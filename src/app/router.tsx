@@ -1,6 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom';
-import Layout from '../shared/components/Layout';
-
+import MainLayout from './components/Layout/Main';
 const QuizListPage = () => <div>Quiz list</div>;
 const QuizCreatePage = () => <div>Create quiz s</div>;
 const QuizEditPage = () => <div>Edit quiz</div>;
@@ -8,7 +7,7 @@ const QuizSolvePage = () => <div>Solve quiz</div>;
 
 export const router = createBrowserRouter([
   {
-    element: <Layout />,
+    element: <MainLayout />,
     children: [
       { path: '/', element: <QuizListPage /> },
       { path: '/quizzes/new', element: <QuizCreatePage /> },
