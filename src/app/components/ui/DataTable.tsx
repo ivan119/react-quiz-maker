@@ -27,6 +27,8 @@ interface DataTableProps<T> {
   rows: T[];
   initialRowsPerPage?: number;
   loading?: boolean;
+  onRowClick?: (row: T) => void;
+  canEdit?: boolean;
 }
 
 export const DataTable = <T extends { id: string | number }>({
@@ -34,6 +36,8 @@ export const DataTable = <T extends { id: string | number }>({
   rows,
   initialRowsPerPage = 10,
   loading = false,
+  onRowClick = () => {},
+  canEdit = true,
 }: DataTableProps<T>) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(initialRowsPerPage);
@@ -112,7 +116,14 @@ export const DataTable = <T extends { id: string | number }>({
           <TableBody>
             {paginatedRows.map((row) => {
               return (
-                <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                <TableRow
+                  hover
+                  role="checkbox"
+                  tabIndex={-1}
+                  key={row.id}
+                  sx={{ cursor: canEdit ? 'pointer' : 'default' }}
+                  onClick={() => onRowClick(row)}
+                >
                   {columns.map((column) => {
                     const value = (row as any)[column.id];
                     return (
