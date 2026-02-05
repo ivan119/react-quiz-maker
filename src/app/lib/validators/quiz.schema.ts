@@ -9,7 +9,7 @@ export const quizSchema = z.object({
                 answer: z.string().min(1, "Answer is required"),
             })
         )
-        .min(1, "At least one question is required"),
+        .min(15, "At least 15 questions is required to save quiz"),
 });
 
 export type QuizFormValues = z.infer<typeof quizSchema>;
