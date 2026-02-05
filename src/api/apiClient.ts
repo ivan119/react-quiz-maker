@@ -1,22 +1,4 @@
-export const BASE_URL: string = import.meta.env.VITE_BASE_URL;
-export const USE_LOCAL_STORAGE: boolean =
-  import.meta.env.VITE_USE_LOCAL_STORAGE === 'true';
-
-export const STORAGE_KEYS = {
-  QUIZZES: 'rejd_quizzes',
-  QUESTIONS: 'rejd_questions',
-};
-
-// Local Storage Helpers
-
-export const getStored = <T>(key: string, fallback: T): T => {
-  const stored = localStorage.getItem(key);
-  return stored ? JSON.parse(stored) : fallback;
-};
-
-export const setStored = <T>(key: string, data: T): void => {
-  localStorage.setItem(key, JSON.stringify(data));
-};
+export const BASE_URL: string = import.meta.env.VITE_BASE_URL || '';
 
 // Global API Request Handler
 
