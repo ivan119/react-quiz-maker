@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import MainLayout from './components/Layout/Main';
 const QuizListPage = () => <div>Quiz list</div>;
-const QuizCreatePage = () => <div>Create quiz s</div>;
+import QuizCreatePage from './routes/QuizCreatePage';
 const QuizEditPage = () => <div>Edit quiz</div>;
 const QuizSolvePage = () => <div>Solve quiz</div>;
 
