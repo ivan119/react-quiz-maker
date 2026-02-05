@@ -18,7 +18,10 @@ export async function request<T>(
 
   try {
     const response = await fetch(url, { ...options, headers });
-
+    if (import.meta.env.VITE_ENABLE_MOCKS) {
+      // just fake delay for 1 second to simulate network delay for mocks
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
     if (!response.ok) {
       // Attempt to get error message from response body
       const errorData = await response.json().catch(() => ({}));
