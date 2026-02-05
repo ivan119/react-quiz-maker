@@ -8,6 +8,7 @@ import {
   Paper,
   TablePagination,
   TableSortLabel,
+  CircularProgress,
 } from '@mui/material';
 import { useState, useMemo, type ReactNode } from 'react';
 
@@ -25,12 +26,14 @@ interface DataTableProps<T> {
   columns: Column<T>[];
   rows: T[];
   initialRowsPerPage?: number;
+  loading?: boolean;
 }
 
 export const DataTable = <T extends { id: string | number }>({
   columns,
   rows,
   initialRowsPerPage = 10,
+  loading = false,
 }: DataTableProps<T>) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(initialRowsPerPage);
@@ -124,7 +127,18 @@ export const DataTable = <T extends { id: string | number }>({
                 </TableRow>
               );
             })}
-            {rows.length === 0 && (
+            {loading && (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  align="center"
+                  sx={{ py: 3 }}
+                >
+                  <CircularProgress />
+                </TableCell>
+              </TableRow>
+            )}
+            {rows.length === 0 && !loading && (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}

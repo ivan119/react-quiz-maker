@@ -33,7 +33,6 @@ const QuizListPage = () => {
     }
   };
 
-
   const columns: Column<QuizDetail>[] = [
     {
       id: 'name',
@@ -70,7 +69,7 @@ const QuizListPage = () => {
             </IconButton>
           </Tooltip>
           <Tooltip title="Delete Quiz">
-            <IconButton color="error" >
+            <IconButton color="error">
               <DeleteIcon />
             </IconButton>
           </Tooltip>
@@ -102,15 +101,19 @@ const QuizListPage = () => {
       </Box>
 
       <Box sx={{ opacity: loading ? 0.7 : 1, position: 'relative' }}>
-        <DataTable columns={columns} rows={quizzes} initialRowsPerPage={10} />
+        <DataTable
+          columns={columns}
+          rows={quizzes}
+          initialRowsPerPage={10}
+          loading={loading}
+        />
       </Box>
 
-      {error && (
+      {error && !loading && (
         <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
           {error}
         </Typography>
       )}
-
     </Box>
   );
 };
