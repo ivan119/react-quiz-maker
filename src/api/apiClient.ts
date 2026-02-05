@@ -31,6 +31,11 @@ export async function request<T>(
       throw new Error(message);
     }
 
+    // No content response
+    if (response.status === 204) {
+      return {} as T;
+    }
+
     return (await response.json()) as T;
   } catch (error) {
     // Re-throw the error so it can be caught by the caller
