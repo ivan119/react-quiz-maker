@@ -1,14 +1,18 @@
 export interface Question {
   id: string;
-  text: string;
+  question: string;
   answer: string;
 }
 
 export interface Quiz {
   id: string;
-  title: string;
+  name: string;
+  questionIds: string[];
+}
+export interface QuizDetail extends Omit<Quiz, 'questionIds'> {
   questions: Question[];
 }
 
-export type QuizCreateInput = Omit<Quiz, 'id'>;
-export type QuizUpdateInput = Partial<Omit<Quiz, 'id'>>;
+export type QuizCreateInput = Omit<Quiz, 'id'> & {
+  questions?: Omit<Question, 'id'>[];
+};
