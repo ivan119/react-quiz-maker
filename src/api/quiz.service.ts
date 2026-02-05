@@ -1,4 +1,4 @@
-import type { Quiz, QuizCreateInput } from '../shared/types/quiz';
+import type { Quiz, QuizCreateInput, QuizDetail } from '../shared/types/quiz';
 import { request } from './apiClient';
 
 export const quizService = {
@@ -8,12 +8,12 @@ export const quizService = {
       body: JSON.stringify(input),
     });
   },
-  getAllQuizzes: async (): Promise<Quiz[]> => {
-    return request<Quiz[]>('/quizzes');
+  getAllQuizzes: async (): Promise<QuizDetail[]> => {
+    return request<QuizDetail[]>('/quizzes');
   },
 
-  getQuizById: async (id: string): Promise<Quiz | undefined> => {
-    return request<Quiz>(`/quizzes/${id}`);
+  getQuizById: async (id: string): Promise<QuizDetail | undefined> => {
+    return request<QuizDetail>(`/quizzes/${id}`);
   },
 
   deleteQuiz: async (id: string): Promise<void> => {
