@@ -84,13 +84,6 @@ const QuizForm = ({
           >
             <Box>
               <Typography variant="h6">Questions</Typography>
-              <Typography
-                variant="body2"
-                color={fields.length < 15 ? 'error' : 'success.main'}
-                sx={{ fontWeight: 'bold' }}
-              >
-                {fields.length} / 15 required
-              </Typography>
             </Box>
 
             <Button
@@ -116,15 +109,17 @@ const QuizForm = ({
             />
           ))}
 
-          {errors.questions?.message && (
+          {(errors.questions)?.message ||
+          errors.questions?.root?.message ? (
             <Typography
               color="error"
               variant="caption"
               sx={{ mt: 1, display: 'block' }}
             >
-              {errors.questions?.message}
+              {(errors.questions)?.message ||
+                errors.questions?.root?.message}
             </Typography>
-          )}
+          ) : null}
           <Box
             sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end', gap: 2 }}
           >
