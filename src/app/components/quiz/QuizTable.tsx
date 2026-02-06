@@ -1,9 +1,9 @@
-import { Box, Typography, IconButton, Tooltip } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import {
   Delete as DeleteIcon,
   PlayArrow as PlayIcon,
 } from '@mui/icons-material';
-import { DataTable, type Column } from '../ui';
+import { DataTable, type Column, Button } from '../ui';
 import type { QuizDetail } from '../../../api';
 
 type Props = {
@@ -45,16 +45,20 @@ const QuizTable = ({
       sortable: false,
       format: (_, row) => (
         <Box onClick={(e) => e.stopPropagation()}>
-          <Tooltip title="Solve Quiz">
-            <IconButton color="primary" onClick={() => onSolve(row.id)}>
-              <PlayIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete Quiz">
-            <IconButton color="error" onClick={() => onDelete(row)}>
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
+          <Button
+            isIconButton
+            color="primary"
+            onClick={() => onSolve(row.id)}
+            icon={<PlayIcon />}
+            tooltip="Solve Quiz"
+          />
+          <Button
+            isIconButton
+            color="error"
+            onClick={() => onDelete(row)}
+            icon={<DeleteIcon />}
+            tooltip="Delete Quiz"
+          />
         </Box>
       ),
     },

@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Typography, Box, Button } from '@mui/material';
+import { Typography, Box } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { quizService, type QuizDetail } from '../../api';
 import { Modal } from '../components/ui/Modal';
+import { Button } from '../components/ui';
 import QuizTable from '../components/quiz/QuizTable';
 
 const QuizListPage = () => {
@@ -67,11 +68,10 @@ const QuizListPage = () => {
         </Typography>
         <Button
           variant="contained"
-          startIcon={<AddIcon />}
+          icon={<AddIcon />}
           onClick={() => navigate('/quizzes/new')}
-        >
-          Create New Quiz
-        </Button>
+          title="Create New Quiz"
+        />
       </Box>
 
       <QuizTable

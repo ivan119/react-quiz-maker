@@ -10,13 +10,12 @@ import {
   AccordionDetails,
   Typography,
   Box,
-  Button,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
   ExpandMore as ExpandMoreIcon,
 } from '@mui/icons-material';
-import { FormInput } from '../ui';
+import { FormInput, Button } from '../ui';
 import { type QuizFormValues } from '../../lib/validators/quiz.schema';
 
 type QuizQuestionItemProps = {
@@ -80,11 +79,10 @@ export const QuizQuestionItem = memo(
               <Button
                 size="small"
                 color="error"
-                startIcon={<DeleteIcon />}
+                icon={<DeleteIcon />}
                 onClick={() => remove(index)}
-              >
-                Remove Question
-              </Button>
+                title="Remove Question"
+              />
             </Box>
           )}
         </AccordionDetails>

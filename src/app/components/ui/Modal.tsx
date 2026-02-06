@@ -4,11 +4,11 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button,
   IconButton,
   Typography,
   Box,
 } from '@mui/material';
+import { Button } from './Button';
 import { Close as CloseIcon } from '@mui/icons-material';
 
 export interface ModalProps {
@@ -141,16 +141,17 @@ export const Modal = ({
                   textTransform: 'none',
                   fontWeight: 600,
                 }}
-              >
-                {cancelText}
-              </Button>
+                title={cancelText}
+              />
             )}
             {showConfirm && (
               <Button
                 onClick={handleConfirm}
                 variant="contained"
                 color={confirmColor}
-                disabled={confirmDisabled || loading}
+                disabled={confirmDisabled}
+                isLoading={loading}
+                title={loading ? 'Processing...' : confirmText}
                 sx={{
                   borderRadius: 2,
                   px: 3,
@@ -161,9 +162,7 @@ export const Modal = ({
                     boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                   },
                 }}
-              >
-                {loading ? 'Processing...' : confirmText}
-              </Button>
+              />
             )}
           </DialogActions>
         )}

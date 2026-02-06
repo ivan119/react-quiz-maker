@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useFieldArray, useForm } from 'react-hook-form';
-import { Typography, Box, Button, Paper, Divider } from '@mui/material';
+import { Typography, Box, Paper, Divider } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
-import { Form, FormInput } from '../ui';
+import { Form, FormInput, Button } from '../ui';
 import { QuizQuestionItem } from './QuizQuestionItem';
 import {
   quizSchema,
@@ -81,16 +81,15 @@ const QuizForm = ({
             </Box>
 
             <Button
-              startIcon={<AddIcon />}
+              icon={<AddIcon />}
               variant="contained"
               size="small"
               onClick={() => {
                 append({ question: '', answer: '' });
                 setExpanded(`panel${fields.length}`);
               }}
-            >
-              Add Question
-            </Button>
+              title="Add Question"
+            />
           </Box>
           {fields.map((field, index) => (
             <QuizQuestionItem
@@ -117,11 +116,10 @@ const QuizForm = ({
             <Button
               variant="contained"
               type="submit"
-              disabled={isSubmitting}
+              isLoading={isSubmitting}
               size="large"
-            >
-              {isSubmitting ? 'Saving...' : submitLabel}
-            </Button>
+              title={submitLabel}
+            />
           </Box>
         </Form>
       </Paper>

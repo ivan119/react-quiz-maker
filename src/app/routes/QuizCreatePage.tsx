@@ -21,16 +21,15 @@ const QuizCreatePage = () => {
     }
   };
 
-
   return (
-      <Box>
-        <QuizForm
-            title="Create New Quiz"
-            submitLabel="Save Quiz"
-            onSubmit={onSubmit}
-        />
-        <Button variant="text" onClick={() => navigate("/")}>Cancel</Button>
-      </Box>
+    <Box>
+      <QuizForm
+        title="Create New Quiz"
+        submitLabel="Save Quiz"
+        onSubmit={onSubmit}
+      />
+      <Button variant="text" onClick={() => navigate('/')} title="Cancel" />
+    </Box>
   );
 };
 
