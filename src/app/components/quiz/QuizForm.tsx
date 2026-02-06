@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useFieldArray, useForm, useWatch } from 'react-hook-form';
+import {
+  useFieldArray,
+  useForm,
+  useWatch,
+  type Control,
+} from 'react-hook-form';
 import { Typography, Box, Paper, Divider } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
-import { Virtuoso } from 'react-virtuoso';
+import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 import { Form, FormInput, Button } from '../ui';
 import { QuizQuestionItem } from './QuizQuestionItem';
 import {
@@ -20,6 +25,39 @@ type Props = {
   title?: string;
 };
 
+const AddQuestionButton = ({
+  control,
+  append,
+  onAdd,
+}: {
+  control: Control<QuizFormValues>;
+  append: any;
+  onAdd: () => void;
+}) => {
+  const watchedQuestions = useWatch({
+    control,
+    name: 'questions',
+  });
+
+  const hasIncompleteQuestions = watchedQuestions?.some(
+    (q) => !q?.question?.trim() || !q?.answer?.trim()
+  );
+
+  return (
+    <Button
+      icon={<AddIcon />}
+      variant="contained"
+      size="small"
+      disabled={hasIncompleteQuestions}
+      onClick={() => {
+        append({ question: '', answer: '' });
+        onAdd();
+      }}
+      title="Add Question"
+    />
+  );
+};
+
 const QuizForm = ({
   defaultValues = { name: '', questions: [{ question: '', answer: '' }] },
   onSubmit,
@@ -28,8 +66,9 @@ const QuizForm = ({
   title = 'Quiz',
 }: Props) => {
   const navigate = useNavigate();
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [expanded, setExpanded] = useState<string | false>('panel0');
-  console.log('render QuizForm');
+
   const methods = useForm<QuizFormValues>({
     resolver: zodResolver(quizSchema),
     defaultValues,
@@ -45,18 +84,24 @@ const QuizForm = ({
     name: 'questions',
   });
 
-  const watchedQuestions = useWatch({
-    control,
-    name: 'questions',
-  });
-
-  const hasIncompleteQuestions = watchedQuestions?.some(
-    (q) => !q?.question?.trim() || !q?.answer?.trim()
-  );
+  const scrollToPanel = (index?: number) => {
+    const targetIndex = index !== undefined ? index : fields.length;
+    setTimeout(() => {
+      virtuosoRef.current?.scrollToIndex({
+        index: targetIndex,
+        behavior: 'smooth',
+        align: 'start',
+      });
+    }, 369);
+  };
 
   const handleAccordionChange =
-    (panel: string) => (_: React.SyntheticEvent, isExpanded: boolean) => {
+    (panel: string, index: number) =>
+    (_: React.SyntheticEvent, isExpanded: boolean) => {
       setExpanded(isExpanded ? panel : false);
+      if (isExpanded) {
+        scrollToPanel(index);
+      }
     };
 
   const handleCancel = () => {
@@ -79,10 +124,11 @@ const QuizForm = ({
             name="name"
             control={control}
             label="Quiz Name"
+            helperText=" "
             placeholder="General Knowledge"
           />
 
-          <Divider sx={{ my: 4 }} />
+          <Divider sx={{ my: 2 }} />
 
           <Box
             sx={{
@@ -94,8 +140,8 @@ const QuizForm = ({
           >
             <Box>
               <Typography variant="h6">Questions</Typography>
-
-              {errors.questions?.message || errors.questions?.root?.message ? (
+              {(errors.questions?.message ||
+                errors.questions?.root?.message) && (
                 <Typography
                   color="error"
                   variant="caption"
@@ -103,24 +149,24 @@ const QuizForm = ({
                 >
                   {errors.questions?.message || errors.questions?.root?.message}
                 </Typography>
-              ) : null}
+              )}
             </Box>
 
-            <Button
-              icon={<AddIcon />}
-              variant="contained"
-              size="small"
-              disabled={hasIncompleteQuestions}
-              onClick={() => {
-                append({ question: '', answer: '' });
+            <AddQuestionButton
+              control={control}
+              append={append}
+              onAdd={() => {
                 setExpanded(`panel${fields.length}`);
+                scrollToPanel(fields.length);
               }}
-              title="Add Question"
             />
           </Box>
+
           <Virtuoso
-            style={{ height: '400px' }}
+            ref={virtuosoRef}
+            style={{ height: '450px' }}
             data={fields}
+            overscan={200}
             itemContent={(index, field) => {
               const questionError = errors.questions?.[index];
               const hasError = !!(
@@ -128,19 +174,22 @@ const QuizForm = ({
               );
 
               return (
-                <QuizQuestionItem
-                  key={field.id}
-                  control={control}
-                  index={index}
-                  remove={remove}
-                  isExpanded={expanded === `panel${index}`}
-                  onChange={handleAccordionChange(`panel${index}`)}
-                  canRemove={fields.length > 1}
-                  hasError={hasError}
-                />
+                <Box sx={{ pb: 2 }}>
+                  <QuizQuestionItem
+                    key={field.id}
+                    control={control}
+                    index={index}
+                    remove={remove}
+                    isExpanded={expanded === `panel${index}`}
+                    onChange={handleAccordionChange(`panel${index}`, index)}
+                    canRemove={fields.length > 1}
+                    hasError={hasError}
+                  />
+                </Box>
               );
             }}
           />
+
           <Box
             sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end', gap: 2 }}
           >
