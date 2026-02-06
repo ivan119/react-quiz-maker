@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { Typography, Box, Paper, Divider } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { Form, FormInput, Button } from '../ui';
@@ -43,6 +43,15 @@ const QuizForm = ({
     control,
     name: 'questions',
   });
+
+  const watchedQuestions = useWatch({
+    control,
+    name: 'questions',
+  });
+
+  const hasIncompleteQuestions = watchedQuestions?.some(
+    (q) => !q?.question?.trim() || !q?.answer?.trim()
+  );
 
   const handleAccordionChange =
     (panel: string) => (_: React.SyntheticEvent, isExpanded: boolean) => {
@@ -90,6 +99,7 @@ const QuizForm = ({
               icon={<AddIcon />}
               variant="contained"
               size="small"
+              disabled={hasIncompleteQuestions}
               onClick={() => {
                 append({ question: '', answer: '' });
                 setExpanded(`panel${fields.length}`);
@@ -109,15 +119,13 @@ const QuizForm = ({
             />
           ))}
 
-          {(errors.questions)?.message ||
-          errors.questions?.root?.message ? (
+          {errors.questions?.message || errors.questions?.root?.message ? (
             <Typography
               color="error"
               variant="caption"
               sx={{ mt: 1, display: 'block' }}
             >
-              {(errors.questions)?.message ||
-                errors.questions?.root?.message}
+              {errors.questions?.message || errors.questions?.root?.message}
             </Typography>
           ) : null}
           <Box
