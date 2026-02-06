@@ -73,13 +73,15 @@ export const QuizQuestionItem = memo(
           <FormInput<QuizFormValues>
             name={`questions.${index}.question`}
             control={control}
-            label="Question Text"
             multiline
-            rows={2}
+            helperText=" "
+            label="Question Text"
           />
           <FormInput<QuizFormValues>
             name={`questions.${index}.answer`}
             control={control}
+            helperText=" "
+            multiline
             label="Correct Answer"
           />
 
