@@ -10,9 +10,9 @@ export const router = createBrowserRouter([
     element: <MainLayout />,
     children: [
       { path: '/', element: <QuizListPage /> },
-      { path: '/quizzes/new', element: <QuizCreatePage /> },
-      { path: '/quizzes/:id/edit', element: <QuizEditPage /> },
-      { path: '/quizzes/:id/solve', element: <QuizSolvePage /> },
+      { path: '/quiz/create', element: <QuizCreatePage /> },
+      { path: '/quiz/:id/edit', element: <QuizEditPage /> },
+      { path: '/quiz/:id/solve', element: <QuizSolvePage /> },
     ],
   },
 ]);

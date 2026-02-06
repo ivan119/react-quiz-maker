@@ -69,7 +69,7 @@ const QuizListPage = () => {
         <Button
           variant="contained"
           icon={<AddIcon />}
-          onClick={() => navigate('/quizzes/new')}
+          onClick={() => navigate('/quiz/create')}
           title="Create New Quiz"
         />
       </Box>
@@ -77,8 +77,8 @@ const QuizListPage = () => {
       <QuizTable
         quizzes={quizzes}
         loading={loading}
-        onEdit={(id) => navigate(`/quizzes/${id}/edit`)}
-        onSolve={(id) => navigate(`/quizzes/${id}/solve`)}
+        onEdit={(id) => navigate(`/quiz/${id}/edit`)}
+        onSolve={(id) => navigate(`/quiz/${id}/solve`)}
         onDelete={(item) => handleDelete(item)}
       />
       <Modal
