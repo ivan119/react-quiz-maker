@@ -2,7 +2,9 @@ import { useNavigate } from "react-router-dom";
 import QuizForm from "../components/quiz/QuizForm";
 import type { QuizFormValues } from "../lib/validators/quiz.schema";
 import { quizService } from "../../api";
-import { Button, Box } from "@mui/material";
+import {  Box } from "@mui/material";
+import { Button } from '../components/ui';
+
 
 const QuizCreatePage = () => {
   const navigate = useNavigate();
