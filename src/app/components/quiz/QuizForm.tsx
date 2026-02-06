@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { Typography, Box, Paper, Divider } from '@mui/material';
@@ -13,15 +14,19 @@ import {
 type Props = {
   defaultValues?: QuizFormValues;
   onSubmit: (values: QuizFormValues) => Promise<void> | void;
+  onCancel?: () => void;
   submitLabel?: string;
   title?: string;
 };
+
 const QuizForm = ({
   defaultValues = { name: '', questions: [{ question: '', answer: '' }] },
   onSubmit,
+  onCancel,
   submitLabel = 'Save Quiz',
   title = 'Quiz',
 }: Props) => {
+  const navigate = useNavigate();
   const [expanded, setExpanded] = useState<string | false>('panel0');
   console.log('render QuizForm');
   const methods = useForm<QuizFormValues>({
@@ -43,6 +48,14 @@ const QuizForm = ({
     (panel: string) => (_: React.SyntheticEvent, isExpanded: boolean) => {
       setExpanded(isExpanded ? panel : false);
     };
+
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+    } else {
+      navigate('/');
+    }
+  };
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', py: 4 }}>
@@ -112,12 +125,23 @@ const QuizForm = ({
               {errors.questions?.message}
             </Typography>
           )}
-          <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
+          <Box
+            sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end', gap: 2 }}
+          >
+            <Button
+              variant="outlined"
+              onClick={handleCancel}
+              size="large"
+              title="Cancel"
+              disabled={isSubmitting}
+              color="inherit"
+            />
             <Button
               variant="contained"
               type="submit"
               isLoading={isSubmitting}
               size="large"
+              disabled={isSubmitting}
               title={submitLabel}
             />
           </Box>

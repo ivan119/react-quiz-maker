@@ -3,7 +3,6 @@ import QuizForm from '../components/quiz/QuizForm';
 import type { QuizFormValues } from '../lib/validators/quiz.schema';
 import { quizService, questionService } from '../../api';
 import { Box } from '@mui/material';
-import { Button } from '../components/ui';
 
 const QuizCreatePage = () => {
   const navigate = useNavigate();
@@ -29,7 +28,6 @@ const QuizCreatePage = () => {
         submitLabel="Save Quiz"
         onSubmit={onSubmit}
       />
-      <Button variant="text" onClick={() => navigate('/')} title="Cancel" />
     </Box>
   );
 };
