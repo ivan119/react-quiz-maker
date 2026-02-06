@@ -48,7 +48,7 @@ const QuizTable = ({
           <Button
             isIconButton
             color="primary"
-            onClick={() => onSolve(row.id)}
+            onClick={() => row.id && onSolve(row.id)}
             icon={<PlayIcon />}
             tooltip="Solve Quiz"
           />
@@ -66,12 +66,12 @@ const QuizTable = ({
 
   return (
     <Box sx={{ opacity: loading ? 0.7 : 1 }}>
-      <DataTable
+      <DataTable<QuizDetail>
         columns={columns}
         rows={quizzes}
         initialRowsPerPage={10}
         loading={loading}
-        onRowClick={(row) => onEdit(row.id)}
+        onRowClick={(row) => row.id && onEdit(row.id)}
       />
     </Box>
   );

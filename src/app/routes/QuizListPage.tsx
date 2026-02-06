@@ -37,7 +37,7 @@ const QuizListPage = () => {
   const handleDeleteConfirm = async () => {
     if (deleteItem) {
       try {
-        await quizService.deleteQuiz(deleteItem.id);
+        await quizService.deleteQuiz(deleteItem.id as string);
         setDeleteItem(null);
         setOpenModal(false);
         await loadQuizzes();

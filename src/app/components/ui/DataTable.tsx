@@ -31,7 +31,7 @@ interface DataTableProps<T> {
   canEdit?: boolean;
 }
 
-export const DataTable = <T extends { id: string | number }>({
+export const DataTable = <T extends { id?: string | number }>({
   columns,
   rows,
   initialRowsPerPage = 10,
