@@ -7,12 +7,12 @@ export interface Question {
 export interface Quiz {
   id: string;
   name: string;
-  questionIds: string[];
-}
-export interface QuizDetail extends Omit<Quiz, 'questionIds'> {
   questions: Question[];
 }
 
-export type QuizCreateInput = Omit<Quiz, 'id'> & {
-  questions?: Omit<Question, 'id'>[];
-};
+export type QuizDetail = Quiz;
+
+export interface QuizCreateInput {
+  name: string;
+  questions: Omit<Question, 'id'>[];
+}

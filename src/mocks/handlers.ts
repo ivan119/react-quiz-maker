@@ -1,10 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import type {
-  Quiz,
-  QuizCreateInput,
-  Question,
-  QuizDetail,
-} from '../shared/types/quiz';
+import type { Quiz, QuizCreateInput, Question } from '../shared/types/quiz';
 
 const QUIZZES_KEY = 'quizzes';
 const QUESTIONS_KEY = 'questions';
@@ -28,19 +23,8 @@ const setStoredQuestions = (questions: Question[]) => {
 };
 
 export const handlers = [
-  // GET all quizzes (joined with questions for convenience)
   http.get('/quizzes', () => {
-    const quizzes = getStoredQuizzes();
-    const allQuestions = getStoredQuestions();
-
-    const details: QuizDetail[] = quizzes.map((q) => ({
-      ...q,
-      questions: allQuestions.filter((question) =>
-        q.questionIds.includes(question.id)
-      ),
-    }));
-
-    return HttpResponse.json(details);
+    return HttpResponse.json(getStoredQuizzes());
   }),
 
   // GET quiz by id
@@ -53,43 +37,30 @@ export const handlers = [
       return new HttpResponse(null, { status: 404 });
     }
 
-    const allQuestions = getStoredQuestions();
-    const detail: QuizDetail = {
-      ...quiz,
-      questions: allQuestions.filter((q) => quiz.questionIds.includes(q.id)),
-    };
-
-    return HttpResponse.json(detail);
+    return HttpResponse.json(quiz);
   }),
 
   // POST create quiz
   http.post('/quizzes', async ({ request }) => {
     const input = (await request.json()) as QuizCreateInput;
     const quizzes = getStoredQuizzes();
-    const allQuestions = getStoredQuestions();
 
-    // 1. Handle Questions (Recycling check or creation)
-    const questionIds = input.questionIds || [];
     const newQuestions: Question[] = [];
 
-    // If full question objects were passed, save them
+    // Process questions: Generate new IDs ensuring they are unique to this quiz (Copy behavior)
     if (input.questions) {
       input.questions.forEach((q) => {
         const id = crypto.randomUUID();
         const question = { ...q, id };
         newQuestions.push(question);
-        questionIds.push(id);
       });
     }
 
-    // Update global pool
-    setStoredQuestions([...allQuestions, ...newQuestions]);
-
-    // 2. Create Quiz
+    // Create Quiz with EMBEDDED questions
     const newQuiz: Quiz = {
       id: crypto.randomUUID(),
       name: input.name,
-      questionIds: questionIds,
+      questions: newQuestions,
     };
 
     setStoredQuizzes([...quizzes, newQuiz]);
@@ -106,8 +77,23 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 });
   }),
 
-  // GET all questions (The Pool)
+  // GET all questions (The Pool) for recycling
   http.get('/questions', () => {
     return HttpResponse.json(getStoredQuestions());
+  }),
+
+  // POST create question (API for independent question creation)
+  http.post('/questions', async ({ request }) => {
+    const input = (await request.json()) as Omit<Question, 'id'>[];
+    const questions = getStoredQuestions();
+
+    const newQuestions = input.map((q) => ({
+      ...q,
+      id: crypto.randomUUID(),
+    }));
+
+    setStoredQuestions([...questions, ...newQuestions]);
+
+    return HttpResponse.json(newQuestions, { status: 201 });
   }),
 ];
