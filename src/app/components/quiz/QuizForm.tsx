@@ -107,17 +107,25 @@ const QuizForm = ({
               title="Add Question"
             />
           </Box>
-          {fields.map((field, index) => (
-            <QuizQuestionItem
-              key={field.id}
-              control={control}
-              index={index}
-              remove={remove}
-              isExpanded={expanded === `panel${index}`}
-              onChange={handleAccordionChange(`panel${index}`)}
-              canRemove={fields.length > 1}
-            />
-          ))}
+          {fields.map((field, index) => {
+            const questionError = errors.questions?.[index];
+            const hasError = !!(
+              questionError?.question || questionError?.answer
+            );
+
+            return (
+              <QuizQuestionItem
+                key={field.id}
+                control={control}
+                index={index}
+                remove={remove}
+                isExpanded={expanded === `panel${index}`}
+                onChange={handleAccordionChange(`panel${index}`)}
+                canRemove={fields.length > 1}
+                hasError={hasError}
+              />
+            );
+          })}
 
           {errors.questions?.message || errors.questions?.root?.message ? (
             <Typography

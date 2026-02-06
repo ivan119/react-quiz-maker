@@ -25,6 +25,7 @@ type QuizQuestionItemProps = {
   isExpanded: boolean;
   onChange: (event: React.SyntheticEvent, isExpanded: boolean) => void;
   canRemove: boolean;
+  hasError?: boolean;
 };
 
 export const QuizQuestionItem = memo(
@@ -35,6 +36,7 @@ export const QuizQuestionItem = memo(
     isExpanded,
     onChange,
     canRemove,
+    hasError,
   }: QuizQuestionItemProps) => {
     // Watch only this specific question's title
     const questionTitle = useWatch({
@@ -55,7 +57,14 @@ export const QuizQuestionItem = memo(
         }}
       >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 600,
+              color: hasError ? 'error.main' : 'inherit',
+              transition: 'color 0.2s ease',
+            }}
+          >
             {questionTitle || `New Question #${index + 1}`}
           </Typography>
         </AccordionSummary>
