@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { Typography, Box, Paper, Divider } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
+import { Virtuoso } from 'react-virtuoso';
 import { Form, FormInput, Button } from '../ui';
 import { QuizQuestionItem } from './QuizQuestionItem';
 import {
@@ -67,8 +68,8 @@ const QuizForm = ({
   };
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', py: 4 }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4 }}>
+    <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
         {title}
       </Typography>
 
@@ -93,6 +94,16 @@ const QuizForm = ({
           >
             <Box>
               <Typography variant="h6">Questions</Typography>
+
+              {errors.questions?.message || errors.questions?.root?.message ? (
+                <Typography
+                  color="error"
+                  variant="caption"
+                  sx={{ mt: 1, display: 'block' }}
+                >
+                  {errors.questions?.message || errors.questions?.root?.message}
+                </Typography>
+              ) : null}
             </Box>
 
             <Button
@@ -107,35 +118,29 @@ const QuizForm = ({
               title="Add Question"
             />
           </Box>
-          {fields.map((field, index) => {
-            const questionError = errors.questions?.[index];
-            const hasError = !!(
-              questionError?.question || questionError?.answer
-            );
+          <Virtuoso
+            style={{ height: '400px' }}
+            data={fields}
+            itemContent={(index, field) => {
+              const questionError = errors.questions?.[index];
+              const hasError = !!(
+                questionError?.question || questionError?.answer
+              );
 
-            return (
-              <QuizQuestionItem
-                key={field.id}
-                control={control}
-                index={index}
-                remove={remove}
-                isExpanded={expanded === `panel${index}`}
-                onChange={handleAccordionChange(`panel${index}`)}
-                canRemove={fields.length > 1}
-                hasError={hasError}
-              />
-            );
-          })}
-
-          {errors.questions?.message || errors.questions?.root?.message ? (
-            <Typography
-              color="error"
-              variant="caption"
-              sx={{ mt: 1, display: 'block' }}
-            >
-              {errors.questions?.message || errors.questions?.root?.message}
-            </Typography>
-          ) : null}
+              return (
+                <QuizQuestionItem
+                  key={field.id}
+                  control={control}
+                  index={index}
+                  remove={remove}
+                  isExpanded={expanded === `panel${index}`}
+                  onChange={handleAccordionChange(`panel${index}`)}
+                  canRemove={fields.length > 1}
+                  hasError={hasError}
+                />
+              );
+            }}
+          />
           <Box
             sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end', gap: 2 }}
           >
