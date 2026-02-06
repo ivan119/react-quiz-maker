@@ -2,10 +2,12 @@ import { z } from 'zod';
 
 export const quizSchema = z.object({
   // TODO: add min of 15 questions after development
+  id: z.string().optional(),
   name: z.string().min(3, 'Name must be at least 3 characters'),
   questions: z
     .array(
       z.object({
+        id: z.string().optional(),
         question: z.string().min(1, 'Question text is required'),
         answer: z.string().min(1, 'Answer is required'),
       })

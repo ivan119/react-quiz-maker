@@ -49,7 +49,7 @@ export const handlers = [
 
     // Process questions: Generate new IDs ensuring they are unique to this quiz (Copy behavior)
     if (input.questions) {
-      input.questions.forEach((q) => {
+      input.questions.forEach((q:Question) => {
         const id = crypto.randomUUID();
         const question = { ...q, id };
         newQuestions.push(question);
@@ -68,6 +68,35 @@ export const handlers = [
     return HttpResponse.json(newQuiz, { status: 201 });
   }),
 
+  // PUT update quiz
+  http.put('/quizzes/:id', async ({ params, request }) => {
+    const { id } = params;
+    const input = (await request.json()) as QuizCreateInput;
+    const quizzes = getStoredQuizzes();
+    const quizIndex = quizzes.findIndex((q) => q.id === id);
+    if (!id || typeof id !== 'string') {
+      return new HttpResponse(null, { status: 400 });
+    }
+    if (quizIndex === -1) return new HttpResponse(null, { status: 404 });
+
+    const updatedQuestions = input.questions.map((q: Question) => ({
+      question: q.question,
+      answer: q.answer,
+      // If the frontend is passing id from previous question keep it!
+      // if not, that means we add a new question, so we create new Id!
+      id: q.id || crypto.randomUUID(),
+    }));
+
+    const updatedQuiz = {
+      id,
+      name: input.name,
+      questions: updatedQuestions,
+    };
+
+    quizzes[quizIndex] = updatedQuiz;
+    setStoredQuizzes(quizzes);
+    return HttpResponse.json(updatedQuiz);
+  }),
   // DELETE quiz (keeps questions in the pool as requested!)
   http.delete('/quizzes/:id', ({ params }) => {
     const { id } = params;

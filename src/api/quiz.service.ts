@@ -16,6 +16,16 @@ export const quizService = {
     return request<QuizDetail>(`/quizzes/${id}`);
   },
 
+  updateQuiz: async (
+    id: string,
+    input: QuizCreateInput
+  ): Promise<Quiz> => {
+    return request<Quiz>(`/quizzes/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(input),
+    });
+  },
+
   deleteQuiz: async (id: string): Promise<void> => {
     await request<void>(`/quizzes/${id}`, {
       method: 'DELETE',
