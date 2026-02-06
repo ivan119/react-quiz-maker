@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { TextField, type TextFieldProps } from '@mui/material';
 import {
   type Control,
@@ -13,12 +14,13 @@ interface FormInputProps<T extends FieldValues> {
 }
 
 // Combine our props with MUI TextField props
-export const FormInput = <T extends FieldValues>({
+const FormInputComp = <T extends FieldValues>({
   name,
   control,
   label,
   ...textFieldProps
 }: FormInputProps<T> & Omit<TextFieldProps, 'name' | 'label'>) => {
+  console.log('render FormInput');
   return (
     <Controller
       name={name}
@@ -49,3 +51,5 @@ export const FormInput = <T extends FieldValues>({
     />
   );
 };
+
+export const FormInput = memo(FormInputComp) as typeof FormInputComp;
