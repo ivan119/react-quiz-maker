@@ -8,14 +8,13 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Typography,
   Box,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
   ExpandMore as ExpandMoreIcon,
 } from '@mui/icons-material';
-import { FormInput, Button } from '../ui';
+import { FormInput, Button, PreviewText } from '../ui';
 import { type QuizFormValues } from '../../lib/validators/quiz.schema';
 
 type QuizQuestionItemProps = {
@@ -46,11 +45,6 @@ export const QuizQuestionItem = memo(
       control,
       name: `questions.${index}.answer`,
     });
-      const trimFunction = (value: string): string => {
-          return value.length > 50 ? `${value.slice(0, 50)}…` : value;
-      };
-      const namePreview = questionValue && trimFunction(questionValue as string)
-      const answerPreview = answerValue && trimFunction(answerValue as string);
     return (
       <Accordion
         expanded={isExpanded}
@@ -72,23 +66,24 @@ export const QuizQuestionItem = memo(
               width: '100%',
             }}
           >
-            <Typography
+            <PreviewText
+              label="Question"
+              text={questionValue}
               variant="subtitle1"
               sx={{
                 fontWeight: 600,
                 color: hasError ? 'error.main' : 'inherit',
                 transition: 'color 0.2s ease',
               }}
-            >
-              Question: {namePreview}
-            </Typography>
-            <Typography
+            />
+
+            <PreviewText
+              label="Answer"
+              text={answerValue}
               variant="body2"
               color="text.secondary"
               sx={{ mt: 0.25 }}
-            >
-              Answer: {answerPreview}
-            </Typography>
+            />
           </Box>
         </AccordionSummary>
         {/* we render accordion details / 2 inputs only when expanded to prevent re-rendering */}
