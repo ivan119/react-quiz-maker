@@ -17,7 +17,7 @@ export const PreviewText = ({
   return (
     <Typography {...props}>
       {label && <strong>{label}: </strong>}
-      {display || '---'}
+      {display || ''}
     </Typography>
   );
 };
