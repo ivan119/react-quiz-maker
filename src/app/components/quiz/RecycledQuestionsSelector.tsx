@@ -1,4 +1,10 @@
-import { useEffect, useState, useMemo, memo, useCallback } from 'react';
+import {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  type ReactNode,
+} from 'react';
 import {
   Box,
   Checkbox,
@@ -6,7 +12,6 @@ import {
   TextField,
   InputAdornment,
   Chip,
-  Paper,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -15,73 +20,14 @@ import {
   CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
-import { Virtuoso } from 'react-virtuoso';
 import { questionService } from '../../../api';
 import { type Question } from '../../../shared/types/quiz';
-import { PreviewText, Button } from '../ui';
+import { PreviewText, Button, DataTable, type Column } from '../ui';
 
 interface Props {
   onSelect: (questions: Question[]) => void;
   existingQuestions?: { id?: string; question: string; answer: string }[];
 }
-
-// Optimized row component
-const QuestionItem = memo(
-  ({
-    question,
-    isSelected,
-    onToggle,
-  }: {
-    question: Question;
-    isSelected: boolean;
-    onToggle: (id: string) => void;
-  }) => {
-    const handleToggle = useCallback(() => {
-      if (question.id) onToggle(question.id);
-    }, [question.id, onToggle]);
-
-    return (
-      <Box
-        sx={{
-          p: 1.5,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          '&:hover': { bgcolor: 'action.hover' },
-          transition: 'all 0.1s ease',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: 2,
-        }}
-        onClick={handleToggle}
-      >
-        <Checkbox
-          checked={isSelected}
-          color="primary"
-          icon={<CheckBoxOutlineBlankIcon />}
-          checkedIcon={<CheckBoxIcon />}
-          onChange={handleToggle}
-          onClick={(e) => e.stopPropagation()}
-          sx={{ p: 0.5, mt: -0.25 }}
-        />
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <PreviewText
-            text={question.question}
-            variant="subtitle2"
-            sx={{ fontWeight: 700, mb: 0.5 }}
-          />
-          <PreviewText
-            text={question.answer}
-            variant="body2"
-            color="text.secondary"
-          />
-        </Box>
-      </Box>
-    );
-  }
-);
-
-QuestionItem.displayName = 'QuestionItem';
 
 export const RecycledQuestionsSelector = ({
   onSelect,
@@ -153,6 +99,84 @@ export const RecycledQuestionsSelector = ({
       return next;
     });
   };
+
+  const columns: Column<Question>[] = useMemo(
+    () => [
+      {
+        id: 'select',
+        label: '',
+        minWidth: 50,
+        format: (_value: any, row: Question): ReactNode => {
+          const isSelected = !!(row.id && selectedIds.has(row.id));
+          return (
+            <Checkbox
+              checked={isSelected}
+              color="primary"
+              icon={<CheckBoxOutlineBlankIcon sx={{ fontSize: 20 }} />}
+              checkedIcon={<CheckBoxIcon sx={{ fontSize: 20 }} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (row.id) toggleSelection(row.id);
+              }}
+              sx={{ p: 0 }}
+            />
+          );
+        },
+      },
+      {
+        id: 'question',
+        label: 'Question',
+        minWidth: 250,
+        format: (value: string, row: Question): ReactNode => {
+          const isInQuiz = existingQuestions.some(
+            (eq) =>
+              (row.id && eq.id === row.id) ||
+              eq.question.trim().toLowerCase() ===
+                row.question.trim().toLowerCase()
+          );
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <PreviewText
+                text={value}
+                limit={60}
+                variant="body2"
+                sx={{ fontWeight: 600 }}
+              />
+              {isInQuiz && (
+                <Chip
+                  label="Already in Quiz"
+                  size="small"
+                  color="success"
+                  variant="outlined"
+                  sx={{
+                    height: 18,
+                    fontSize: '0.6rem',
+                    fontWeight: 800,
+                    borderRadius: 1,
+                    opacity: 0.8,
+                  }}
+                />
+              )}
+            </Box>
+          );
+        },
+      },
+      {
+        id: 'answer',
+        label: 'Answer',
+        minWidth: 200,
+        format: (value: string): ReactNode => (
+          <PreviewText
+            text={value}
+            limit={60}
+            variant="body2"
+            color="text.secondary"
+          />
+        ),
+      },
+    ],
+    [selectedIds, existingQuestions, toggleSelection]
+  );
 
   if (loading) {
     return (
@@ -248,104 +272,18 @@ export const RecycledQuestionsSelector = ({
         />
       </Box>
 
-      {/* Virtualized List */}
-      <Paper
-        elevation={0}
-        sx={{
-          height: 380,
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 4,
-          overflow: 'hidden',
-          bgcolor: 'background.paper',
-        }}
-      >
-        <Virtuoso
-          data={filteredQuestions}
-          itemContent={(_index, question) => {
-            const isSelected = !!(question.id && selectedIds.has(question.id));
-            return (
-              <Box
-                key={question.id}
-                sx={{
-                  p: 1.5,
-                  px: 2,
-                  borderBottom: '1px solid',
-                  borderColor: 'divider',
-                  bgcolor: isSelected
-                    ? 'rgba(var(--mui-palette-primary-mainChannel), 0.04)'
-                    : 'transparent',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 2,
-                  transition: 'background-color 0.2s ease',
-                  '&:hover': {
-                    bgcolor:
-                      'rgba(var(--mui-palette-primary-mainChannel), 0.02)',
-                  },
-                }}
-                onClick={() => question.id && toggleSelection(question.id)}
-              >
-                <Checkbox
-                  checked={isSelected}
-                  color="primary"
-                  icon={<CheckBoxOutlineBlankIcon sx={{ fontSize: 20 }} />}
-                  checkedIcon={<CheckBoxIcon sx={{ fontSize: 20 }} />}
-                  sx={{ p: 0 }}
-                />
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                      mb: 0.2,
-                    }}
-                  >
-                    <PreviewText
-                      text={question.question}
-                      variant="subtitle2"
-                      sx={{ fontWeight: 700, color: 'text.primary' }}
-                    />
-                    {existingQuestions.some(
-                      (eq) =>
-                        (question.id && eq.id === question.id) ||
-                        eq.question.trim().toLowerCase() ===
-                          question.question.trim().toLowerCase()
-                    ) && (
-                      <Chip
-                        label="Already in Quiz"
-                        size="small"
-                        color="success"
-                        variant="outlined"
-                        sx={{
-                          height: 18,
-                          fontSize: '0.6rem',
-                          fontWeight: 800,
-                          borderRadius: 1,
-                          opacity: 0.8,
-                        }}
-                      />
-                    )}
-                  </Box>
-                  <PreviewText
-                    text={question.answer}
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{
-                      display: 'block',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  />
-                </Box>
-              </Box>
-            );
+      {/* DataTable */}
+      <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+        <DataTable
+          columns={columns}
+          rows={filteredQuestions}
+          canEdit={true}
+          emptyMessage="No questions match your search."
+          onRowClick={(row) => {
+            if (row.id) toggleSelection(row.id);
           }}
         />
-      </Paper>
+      </Box>
 
       {/* Selection Summary Tray */}
       <Box>
