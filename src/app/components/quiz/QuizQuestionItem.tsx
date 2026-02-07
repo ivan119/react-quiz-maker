@@ -38,12 +38,19 @@ export const QuizQuestionItem = memo(
     canRemove,
     hasError,
   }: QuizQuestionItemProps) => {
-    // Watch only this specific question's title
-    const questionTitle = useWatch({
+    const questionValue = useWatch({
       control,
       name: `questions.${index}.question`,
     });
-
+    const answerValue = useWatch({
+      control,
+      name: `questions.${index}.answer`,
+    });
+      const trimFunction = (value: string): string => {
+          return value.length > 50 ? `${value.slice(0, 50)}…` : value;
+      };
+      const namePreview = questionValue && trimFunction(questionValue as string)
+      const answerPreview = answerValue && trimFunction(answerValue as string);
     return (
       <Accordion
         expanded={isExpanded}
@@ -57,46 +64,64 @@ export const QuizQuestionItem = memo(
         }}
       >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography
-            variant="subtitle1"
+          <Box
             sx={{
-              fontWeight: 600,
-              color: hasError ? 'error.main' : 'inherit',
-              transition: 'color 0.2s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              width: '100%',
             }}
           >
-            {questionTitle || `New Question #${index + 1}`}
-          </Typography>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+                color: hasError ? 'error.main' : 'inherit',
+                transition: 'color 0.2s ease',
+              }}
+            >
+              Question: {namePreview}
+            </Typography>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mt: 0.25 }}
+            >
+              Answer: {answerPreview}
+            </Typography>
+          </Box>
         </AccordionSummary>
+        {/* we render accordion details / 2 inputs only when expanded to prevent re-rendering */}
+        {isExpanded && (
+          <AccordionDetails>
+            <FormInput<QuizFormValues>
+              name={`questions.${index}.question`}
+              control={control}
+              multiline
+              helperText=" "
+              label="Question Text"
+            />
+            <FormInput<QuizFormValues>
+              name={`questions.${index}.answer`}
+              control={control}
+              helperText=" "
+              multiline
+              label="Correct Answer"
+            />
 
-        <AccordionDetails>
-          <FormInput<QuizFormValues>
-            name={`questions.${index}.question`}
-            control={control}
-            multiline
-            helperText=" "
-            label="Question Text"
-          />
-          <FormInput<QuizFormValues>
-            name={`questions.${index}.answer`}
-            control={control}
-            helperText=" "
-            multiline
-            label="Correct Answer"
-          />
-
-          {canRemove && (
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button
-                size="small"
-                color="error"
-                icon={<DeleteIcon />}
-                onClick={() => remove(index)}
-                title="Remove Question"
-              />
-            </Box>
-          )}
-        </AccordionDetails>
+            {canRemove && (
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button
+                  size="small"
+                  color="error"
+                  icon={<DeleteIcon />}
+                  onClick={() => remove(index)}
+                  title="Remove Question"
+                />
+              </Box>
+            )}
+          </AccordionDetails>
+        )}
       </Accordion>
     );
   }
