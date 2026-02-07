@@ -298,6 +298,7 @@ export const RecycledQuestionsSelector = ({
           columns={columns}
           rows={filteredQuestions}
           canEdit={true}
+          height={320}
           emptyMessage="No questions match your search."
           onRowClick={(row) => {
             if (row.id && !isQuestionInQuiz(row)) toggleSelection(row.id);
