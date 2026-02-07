@@ -142,9 +142,14 @@ export const DataTable = <T extends { id?: string | number }>({
         <TableCell
           key={column.id.toString()}
           align={column.align}
-          style={{
+          sx={{
             minWidth: column.minWidth,
-            backgroundColor: 'var(--mui-palette-background-paper)',
+            bgcolor: 'background.paper',
+            borderBottom: 1,
+            borderColor: 'divider',
+            position: 'sticky',
+            top: 0,
+            zIndex: 2,
           }}
           sortDirection={orderBy === column.id ? order : false}
         >
