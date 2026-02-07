@@ -80,19 +80,36 @@ export const RecycledQuestionsSelector = ({
     onSelect(selectedQuestions);
   }, [selectedQuestions, onSelect]);
 
+  // Helper to check if a question is already in quiz
+  const isQuestionInQuiz = useCallback(
+    (q: Question) =>
+      existingQuestions.some(
+        (eq) =>
+          (q.id && eq.id === q.id) ||
+          eq.question.trim().toLowerCase() === q.question.trim().toLowerCase()
+      ),
+    [existingQuestions]
+  );
+
+  // Only count selectable questions (not already in quiz)
+  const selectableQuestions = useMemo(
+    () => filteredQuestions.filter((q) => !isQuestionInQuiz(q)),
+    [filteredQuestions, isQuestionInQuiz]
+  );
+
   const isAllSelected =
-    filteredQuestions.length > 0 &&
-    filteredQuestions.every((q) => q.id && selectedIds.has(q.id));
+    selectableQuestions.length > 0 &&
+    selectableQuestions.every((q) => q.id && selectedIds.has(q.id));
 
   const toggleSelectAll = () => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (isAllSelected) {
-        filteredQuestions.forEach((q) => {
+        selectableQuestions.forEach((q) => {
           if (q.id) next.delete(q.id);
         });
       } else {
-        filteredQuestions.forEach((q) => {
+        selectableQuestions.forEach((q) => {
           if (q.id) next.add(q.id);
         });
       }
@@ -106,17 +123,20 @@ export const RecycledQuestionsSelector = ({
         id: 'select',
         label: '',
         minWidth: 50,
+        sortable: false,
         format: (_value: any, row: Question): ReactNode => {
           const isSelected = !!(row.id && selectedIds.has(row.id));
+          const isInQuiz = isQuestionInQuiz(row);
           return (
             <Checkbox
               checked={isSelected}
+              disabled={isInQuiz}
               color="primary"
               icon={<CheckBoxOutlineBlankIcon sx={{ fontSize: 20 }} />}
               checkedIcon={<CheckBoxIcon sx={{ fontSize: 20 }} />}
               onClick={(e) => {
                 e.stopPropagation();
-                if (row.id) toggleSelection(row.id);
+                if (row.id && !isInQuiz) toggleSelection(row.id);
               }}
               sx={{ p: 0 }}
             />
@@ -175,7 +195,7 @@ export const RecycledQuestionsSelector = ({
         ),
       },
     ],
-    [selectedIds, existingQuestions, toggleSelection]
+    [selectedIds, isQuestionInQuiz, toggleSelection]
   );
 
   if (loading) {
@@ -280,7 +300,7 @@ export const RecycledQuestionsSelector = ({
           canEdit={true}
           emptyMessage="No questions match your search."
           onRowClick={(row) => {
-            if (row.id) toggleSelection(row.id);
+            if (row.id && !isQuestionInQuiz(row)) toggleSelection(row.id);
           }}
         />
       </Box>
