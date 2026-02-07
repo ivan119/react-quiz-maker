@@ -3,8 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import QuizForm from '../components/quiz/QuizForm';
 import type { QuizFormValues } from '../lib/validators/quiz.schema';
 import { quizService } from '../../api';
-import { Box, CircularProgress, Typography } from '@mui/material';
-
+import { Box, CircularProgress } from '@mui/material';
+import { PreviewText } from '../components/ui';
 const QuizEditPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -82,9 +82,11 @@ const QuizEditPage = () => {
   if (error || !defaultValues) {
     return (
       <Box sx={{ textAlign: 'center', mt: 4 }}>
-        <Typography color="error" variant="h6">
-          {error || 'Failed to load quiz'}
-        </Typography>
+        <PreviewText
+          text={error || 'Failed to load quiz'}
+          color="error"
+          variant="h6"
+        />
       </Box>
     );
   }

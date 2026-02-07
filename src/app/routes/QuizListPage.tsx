@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Typography, Box } from '@mui/material';
+import {  Box } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { quizService, type QuizDetail } from '../../api';
 import { Modal } from '../components/ui/Modal';
-import { Button } from '../components/ui';
+import { Button, PreviewText } from '../components/ui';
 import QuizTable from '../components/quiz/QuizTable';
 
 const QuizListPage = () => {
@@ -63,9 +63,7 @@ const QuizListPage = () => {
           mb: 3,
         }}
       >
-        <Typography variant="h4" component="h1">
-          Quizzes
-        </Typography>
+        <PreviewText variant="h4" component="h1" text="Quizzes" />
         <Button
           variant="contained"
           icon={<AddIcon />}
@@ -88,16 +86,18 @@ const QuizListPage = () => {
         confirmText="Delete"
         confirmColor="error"
       >
-        <Typography>
-          Are you sure you want to delete this quiz?
-          <br />
-          Name : {deleteItem?.name}
-        </Typography>
+        <PreviewText
+          text={`Are you sure you want to delete this quiz?\nName: ${deleteItem?.name ?? ''}`}
+          sx={{ whiteSpace: 'pre-line' }}
+          limit={100}
+        />
       </Modal>
       {error && !loading && (
-        <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
-          {error}
-        </Typography>
+        <PreviewText
+          text={error}
+          color="error"
+          sx={{ mt: 2, textAlign: 'center' }}
+        />
       )}
     </Box>
   );

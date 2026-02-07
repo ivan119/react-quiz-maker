@@ -1,14 +1,16 @@
-import { AppBar, Container, Toolbar, Typography } from '@mui/material';
+import { AppBar, Container, Toolbar } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
+import { PreviewText } from '../ui';
 
 const Header = () => {
   return (
     <AppBar position="static">
       <Container maxWidth="lg">
         <Toolbar disableGutters>
-          <Typography
-            variant="h6"
+          <PreviewText
+            text="Rejd Quiz Maker"
             component={RouterLink}
+            variant="h6"
             to="/"
             sx={{
               flexGrow: 1,
@@ -16,9 +18,7 @@ const Header = () => {
               color: 'inherit',
               fontWeight: 'bold',
             }}
-          >
-            Rejd Quiz Maker
-          </Typography>
+          />
         </Toolbar>
       </Container>
     </AppBar>

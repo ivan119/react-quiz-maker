@@ -1,9 +1,9 @@
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import {
   Delete as DeleteIcon,
   PlayArrow as PlayIcon,
 } from '@mui/icons-material';
-import { DataTable, type Column, Button } from '../ui';
+import { DataTable, type Column, Button, PreviewText } from '../ui';
 import type { QuizDetail } from '../../../api';
 
 type Props = {
@@ -28,12 +28,12 @@ const QuizTable = ({
       minWidth: 170,
       format: (value, row) => (
         <Box>
-          <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
-            {value}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {row.questions.length} questions
-          </Typography>
+          <PreviewText variant="subtitle1" text={value} />
+          <PreviewText
+            variant="caption"
+            color="text.secondary"
+            text={`${row.questions.length} questions`}
+          />
         </Box>
       ),
     },

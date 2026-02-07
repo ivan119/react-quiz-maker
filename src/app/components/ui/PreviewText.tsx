@@ -4,6 +4,7 @@ interface PreviewText extends TypographyProps {
   text?: string;
   limit?: number;
   label?: string;
+  to?: string;
 }
 
 export const PreviewText = ({
@@ -13,7 +14,7 @@ export const PreviewText = ({
   ...props
 }: PreviewText) => {
   const display = text.length > limit ? `${text.slice(0, limit)}…` : text;
-
+  console.log(display);
   return (
     <Typography {...props}>
       {label && <strong>{label}: </strong>}

@@ -5,10 +5,10 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
-  Typography,
   Box,
 } from '@mui/material';
 import { Button } from './Button';
+import { PreviewText } from './PreviewText';
 import { Close as CloseIcon } from '@mui/icons-material';
 
 export interface ModalProps {
@@ -96,13 +96,12 @@ export const Modal = ({
       <Box sx={{ position: 'relative' }}>
         {title && (
           <DialogTitle sx={{ m: 0, p: 2.5, pr: 6 }}>
-            <Typography
+            <PreviewText
               variant="h6"
               component="div"
               sx={{ fontWeight: 700, letterSpacing: '-0.01em' }}
-            >
-              {title}
-            </Typography>
+              text={title}
+            />
           </DialogTitle>
         )}
 

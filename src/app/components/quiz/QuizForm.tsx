@@ -7,10 +7,10 @@ import {
   useWatch,
   type Control,
 } from 'react-hook-form';
-import { Typography, Box, Paper, Divider } from '@mui/material';
+import { Box, Paper, Divider } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
-import { Form, FormInput, Button } from '../ui';
+import { Form, FormInput, Button, PreviewText } from '../ui';
 import { QuizQuestionItem } from './QuizQuestionItem';
 import {
   quizSchema,
@@ -118,9 +118,12 @@ const QuizForm = ({
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
-        {title}
-      </Typography>
+      <PreviewText
+        variant="h4"
+        component="div"
+        sx={{ fontWeight: 700, letterSpacing: '-0.01em', mb: 2 }}
+        text={title}
+      />
 
       <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
         <Form<QuizFormValues> onSubmit={onSubmit} useFormMethods={methods}>
@@ -143,16 +146,16 @@ const QuizForm = ({
             }}
           >
             <Box>
-              <Typography variant="h6">Questions</Typography>
+              <PreviewText variant="h6" text="Questions" />
               {(errors.questions?.message ||
                 errors.questions?.root?.message) && (
-                <Typography
-                  color="error"
+                <PreviewText
                   variant="caption"
-                  sx={{ mt: 1, display: 'block' }}
-                >
-                  {errors.questions?.message || errors.questions?.root?.message}
-                </Typography>
+                  color="error"
+                  text={
+                    errors.questions?.message || errors.questions?.root?.message
+                  }
+                />
               )}
             </Box>
 
