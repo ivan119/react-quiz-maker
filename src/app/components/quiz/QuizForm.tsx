@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -7,15 +7,22 @@ import {
   useWatch,
   type Control,
 } from 'react-hook-form';
-import { Box, Paper, Divider } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { Box, Paper, Divider, CircularProgress } from '@mui/material';
+import { Add as AddIcon, History as HistoryIcon } from '@mui/icons-material';
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
-import { Form, FormInput, Button, PreviewText } from '../ui';
+import { Form, FormInput, Button, PreviewText, Modal } from '../ui';
 import { QuizQuestionItem } from './QuizQuestionItem';
 import {
   quizSchema,
   type QuizFormValues,
 } from '../../lib/validators/quiz.schema';
+import { type Question } from '../../../shared/types/quiz';
+
+const RecycledQuestionsSelector = lazy(() =>
+  import('./RecycledQuestionsSelector').then((module) => ({
+    default: module.RecycledQuestionsSelector,
+  }))
+);
 
 type Props = {
   defaultValues?: QuizFormValues;
@@ -72,6 +79,10 @@ const QuizForm = ({
   const [expanded, setExpanded] = useState<string | false>(
     isEdit ? false : 'panel0'
   );
+  const [isRecycleModalOpen, setIsRecycleModalOpen] = useState(false);
+  const [selectedRecycledQuestions, setSelectedRecycledQuestions] = useState<
+    Question[]
+  >([]);
 
   const methods = useForm<QuizFormValues>({
     resolver: zodResolver(quizSchema),
@@ -107,6 +118,31 @@ const QuizForm = ({
         scrollToPanel(index);
       }
     };
+
+  const handlePushRecycled = () => {
+    if (selectedRecycledQuestions.length > 0) {
+      // If we have a single empty question, remove it first
+      if (fields.length === 1 && !fields[0].question && !fields[0].answer) {
+        remove(0);
+      }
+
+      append(
+        selectedRecycledQuestions.map((q) => ({
+          question: q.question,
+          answer: q.answer,
+        }))
+      );
+
+      setIsRecycleModalOpen(false);
+      setSelectedRecycledQuestions([]);
+
+      // Expand the first newly added question
+      const newIndex =
+        fields.length === 1 && !fields[0].question ? 0 : fields.length;
+      setExpanded(`panel${newIndex}`);
+      scrollToPanel(newIndex);
+    }
+  };
 
   const handleCancel = () => {
     if (onCancel) {
@@ -159,14 +195,23 @@ const QuizForm = ({
               )}
             </Box>
 
-            <AddQuestionButton
-              control={control}
-              append={append}
-              onAdd={() => {
-                setExpanded(`panel${fields.length}`);
-                scrollToPanel(fields.length);
-              }}
-            />
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                icon={<HistoryIcon />}
+                variant="outlined"
+                size="small"
+                onClick={() => setIsRecycleModalOpen(true)}
+                title="Recycle"
+              />
+              <AddQuestionButton
+                control={control}
+                append={append}
+                onAdd={() => {
+                  setExpanded(`panel${fields.length}`);
+                  scrollToPanel(fields.length);
+                }}
+              />
+            </Box>
           </Box>
 
           <Virtuoso
@@ -219,6 +264,26 @@ const QuizForm = ({
           </Box>
         </Form>
       </Paper>
+
+      <Modal
+        open={isRecycleModalOpen}
+        onClose={() => setIsRecycleModalOpen(false)}
+        onConfirm={handlePushRecycled}
+        title="Question Bank"
+        confirmText={`Add ${selectedRecycledQuestions.length} Questions`}
+        confirmDisabled={selectedRecycledQuestions.length === 0}
+        maxWidth="md"
+      >
+        <Suspense
+          fallback={
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+              <CircularProgress />
+            </Box>
+          }
+        >
+          <RecycledQuestionsSelector onSelect={setSelectedRecycledQuestions} />
+        </Suspense>
+      </Modal>
     </Box>
   );
 };
