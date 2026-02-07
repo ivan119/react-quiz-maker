@@ -86,7 +86,6 @@ export const QuizQuestionItem = memo(
             />
           </Box>
         </AccordionSummary>
-        {/* we render accordion details / 2 inputs only when expanded to prevent re-rendering */}
         {isExpanded && (
           <AccordionDetails>
             <FormInput<QuizFormValues>
@@ -94,12 +93,14 @@ export const QuizQuestionItem = memo(
               control={control}
               multiline
               helperText=" "
+              maxRows={2}
               label="Question Text"
             />
             <FormInput<QuizFormValues>
               name={`questions.${index}.answer`}
               control={control}
               helperText=" "
+              maxRows={5}
               multiline
               label="Correct Answer"
             />
