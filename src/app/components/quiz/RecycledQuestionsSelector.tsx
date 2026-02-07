@@ -22,6 +22,7 @@ import { PreviewText, Button } from '../ui';
 
 interface Props {
   onSelect: (questions: Question[]) => void;
+  existingQuestions?: { id?: string; question: string; answer: string }[];
 }
 
 // Optimized row component
@@ -82,7 +83,10 @@ const QuestionItem = memo(
 
 QuestionItem.displayName = 'QuestionItem';
 
-export const RecycledQuestionsSelector = ({ onSelect }: Props) => {
+export const RecycledQuestionsSelector = ({
+  onSelect,
+  existingQuestions = [],
+}: Props) => {
   const [allQuestions, setAllQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -291,11 +295,40 @@ export const RecycledQuestionsSelector = ({ onSelect }: Props) => {
                   sx={{ p: 0 }}
                 />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <PreviewText
-                    text={question.question}
-                    variant="subtitle2"
-                    sx={{ fontWeight: 700, mb: 0.2, color: 'text.primary' }}
-                  />
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      mb: 0.2,
+                    }}
+                  >
+                    <PreviewText
+                      text={question.question}
+                      variant="subtitle2"
+                      sx={{ fontWeight: 700, color: 'text.primary' }}
+                    />
+                    {existingQuestions.some(
+                      (eq) =>
+                        (question.id && eq.id === question.id) ||
+                        eq.question.trim().toLowerCase() ===
+                          question.question.trim().toLowerCase()
+                    ) && (
+                      <Chip
+                        label="Already in Quiz"
+                        size="small"
+                        color="success"
+                        variant="outlined"
+                        sx={{
+                          height: 18,
+                          fontSize: '0.6rem',
+                          fontWeight: 800,
+                          borderRadius: 1,
+                          opacity: 0.8,
+                        }}
+                      />
+                    )}
+                  </Box>
                   <PreviewText
                     text={question.answer}
                     variant="caption"

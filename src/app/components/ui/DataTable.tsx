@@ -17,7 +17,7 @@ export interface Column<T> {
   label: string;
   minWidth?: number;
   align?: 'right' | 'left' | 'center';
-  format?: (value: any, row: T) => ReactNode;
+  format?: (value: any, row: T, index: number) => ReactNode;
 
   sortable?: boolean;
 }
@@ -27,17 +27,19 @@ interface DataTableProps<T> {
   rows: T[];
   initialRowsPerPage?: number;
   loading?: boolean;
-  onRowClick?: (row: T) => void;
+  onRowClick?: (row: T, index?: number) => void;
   canEdit?: boolean;
+  emptyMessage?: string;
 }
 
 export const DataTable = <T extends { id?: string | number }>({
   columns,
   rows,
-  initialRowsPerPage = 10,
+  initialRowsPerPage = 25,
   loading = false,
   onRowClick = () => {},
   canEdit = true,
+  emptyMessage = 'No data available',
 }: DataTableProps<T>) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(initialRowsPerPage);
@@ -114,7 +116,7 @@ export const DataTable = <T extends { id?: string | number }>({
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedRows.map((row) => {
+            {paginatedRows.map((row, index) => {
               return (
                 <TableRow
                   hover
@@ -122,7 +124,7 @@ export const DataTable = <T extends { id?: string | number }>({
                   tabIndex={-1}
                   key={row.id}
                   sx={{ cursor: canEdit ? 'pointer' : 'default' }}
-                  onClick={() => onRowClick(row)}
+                  onClick={() => onRowClick(row, page * rowsPerPage + index)}
                 >
                   {columns.map((column) => {
                     const value = (row as any)[column.id];
@@ -131,7 +133,13 @@ export const DataTable = <T extends { id?: string | number }>({
                         key={column.id.toString()}
                         align={column.align}
                       >
-                        {column.format ? column.format(value, row) : value}
+                        {column.format
+                          ? column.format(
+                              value,
+                              row,
+                              page * rowsPerPage + index
+                            )
+                          : value}
                       </TableCell>
                     );
                   })}
@@ -156,7 +164,7 @@ export const DataTable = <T extends { id?: string | number }>({
                   align="center"
                   sx={{ py: 3 }}
                 >
-                  No data available please add new Quiz
+                  {emptyMessage}
                 </TableCell>
               </TableRow>
             )}
@@ -164,7 +172,7 @@ export const DataTable = <T extends { id?: string | number }>({
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
+        rowsPerPageOptions={[25, 50, 100]}
         component="div"
         count={rows.length}
         rowsPerPage={rowsPerPage}

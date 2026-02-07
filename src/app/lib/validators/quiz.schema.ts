@@ -8,8 +8,8 @@ export const quizSchema = z.object({
     .array(
       z.object({
         id: z.string().optional(),
-        question: z.string().min(1, 'Question text is required'),
-        answer: z.string().min(1, 'Answer is required'),
+        question: z.string().min(3, 'Question must be at least 3 characters'),
+        answer: z.string().min(3, 'Answer must be at least 3 characters'),
       })
     )
     .min(2, 'At least 2 questions is required to save quiz')
