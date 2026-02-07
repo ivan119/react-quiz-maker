@@ -1,4 +1,5 @@
 import { Typography, type TypographyProps } from '@mui/material';
+import { memo } from 'react';
 
 interface PreviewText extends TypographyProps {
   text?: string;
@@ -7,18 +8,18 @@ interface PreviewText extends TypographyProps {
   to?: string;
 }
 
-export const PreviewText = ({
+export const PreviewText = memo(function PreviewText({
   text = '',
   limit = 50,
   label,
   ...props
-}: PreviewText) => {
+}: PreviewText) {
   const display = text.length > limit ? `${text.slice(0, limit)}…` : text;
   console.log(display);
   return (
     <Typography {...props}>
       {label && <strong>{label}: </strong>}
-      {display || ''}
+      {display}
     </Typography>
   );
-};
+});
