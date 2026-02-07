@@ -286,6 +286,7 @@ const QuizForm = ({
             label="Quiz Name"
             helperText=" "
             placeholder="General Knowledge"
+            autoFocus
           />
 
           <Divider sx={{ my: 2 }} />
@@ -396,7 +397,6 @@ const QuizForm = ({
                   rows={3}
                   label="Question Text"
                   placeholder="What is gravity?"
-                  autoFocus
                 />
                 <FormInput<{ question: string; answer: string }>
                   name="answer"
