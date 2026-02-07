@@ -23,6 +23,7 @@ type Props = {
   onCancel?: () => void;
   submitLabel?: string;
   title?: string;
+  isEdit?: boolean;
 };
 
 const AddQuestionButton = ({
@@ -64,10 +65,13 @@ const QuizForm = ({
   onCancel,
   submitLabel = 'Save Quiz',
   title = 'Quiz',
+  isEdit = false,
 }: Props) => {
   const navigate = useNavigate();
   const virtuosoRef = useRef<VirtuosoHandle>(null);
-  const [expanded, setExpanded] = useState<string | false>('panel0');
+  const [expanded, setExpanded] = useState<string | false>(
+    isEdit ? false : 'panel0'
+  );
 
   const methods = useForm<QuizFormValues>({
     resolver: zodResolver(quizSchema),
