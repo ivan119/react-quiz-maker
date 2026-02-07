@@ -69,7 +69,6 @@ const QuizTable = ({
       <DataTable<QuizDetail>
         columns={columns}
         rows={quizzes}
-        initialRowsPerPage={10}
         loading={loading}
         onRowClick={(row) => row.id && onEdit(row.id)}
       />

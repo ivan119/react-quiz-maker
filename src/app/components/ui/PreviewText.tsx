@@ -15,7 +15,6 @@ export const PreviewText = memo(function PreviewText({
   ...props
 }: PreviewText) {
   const display = text.length > limit ? `${text.slice(0, limit)}…` : text;
-  console.log(display);
   return (
     <Typography {...props}>
       {label && <strong>{label}: </strong>}

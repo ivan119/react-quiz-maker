@@ -98,7 +98,6 @@ const QuizEditPage = () => {
         submitLabel="Update Quiz"
         onSubmit={onSubmit}
         defaultValues={defaultValues}
-        isEdit={true}
       />
     </Box>
   );
