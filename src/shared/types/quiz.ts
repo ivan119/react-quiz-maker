@@ -16,3 +16,10 @@ export interface QuizCreateInput {
   name: string;
   questions: Omit<Question, 'id'>[];
 }
+
+export interface QuestionBankResponse {
+  message: string;
+  addedCount: number;
+  skippedCount: number;
+  questions: Question[];
+}

@@ -1,4 +1,4 @@
-import type { Question } from '../shared/types/quiz';
+import type { Question, QuestionBankResponse } from '../shared/types/quiz';
 import { request } from './apiClient';
 
 export const questionService = {
@@ -8,8 +8,8 @@ export const questionService = {
 
   postNewQuestions: async (
     questions: Omit<Question, 'id'>[]
-  ): Promise<Question[]> => {
-    return request<Question[]>('/questions', {
+  ): Promise<QuestionBankResponse> => {
+    return request<QuestionBankResponse>('/questions', {
       method: 'POST',
       body: JSON.stringify(questions),
     });

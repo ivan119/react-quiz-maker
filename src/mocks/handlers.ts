@@ -49,7 +49,7 @@ export const handlers = [
 
     // Process questions: Generate new IDs ensuring they are unique to this quiz (Copy behavior)
     if (input.questions) {
-      input.questions.forEach((q:Question) => {
+      input.questions.forEach((q: Question) => {
         const id = crypto.randomUUID();
         const question = { ...q, id };
         newQuestions.push(question);
@@ -116,13 +116,41 @@ export const handlers = [
     const input = (await request.json()) as Omit<Question, 'id'>[];
     const questions = getStoredQuestions();
 
-    const newQuestions = input.map((q) => ({
-      ...q,
-      id: crypto.randomUUID(),
-    }));
+    const added: Question[] = [];
+    let skippedCount = 0;
 
-    setStoredQuestions([...questions, ...newQuestions]);
+    input.forEach((q) => {
+      const isDuplicate = questions.some(
+        (eq) =>
+          eq.question.trim().toLowerCase() === q.question.trim().toLowerCase()
+      );
 
-    return HttpResponse.json(newQuestions, { status: 201 });
+      if (!isDuplicate) {
+        const newQuestion = {
+          ...q,
+          id: crypto.randomUUID(),
+        };
+        added.push(newQuestion);
+      } else {
+        skippedCount++;
+      }
+    });
+
+    if (added.length > 0) {
+      setStoredQuestions([...questions, ...added]);
+    }
+
+    return HttpResponse.json(
+      {
+        message:
+          added.length > 0
+            ? `Successfully processed bank update.`
+            : `No new questions were added to the bank.`,
+        addedCount: added.length,
+        skippedCount,
+        questions: added,
+      },
+      { status: 201 }
+    );
   }),
 ];

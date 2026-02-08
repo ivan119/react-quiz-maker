@@ -16,42 +16,74 @@ const QuizCreatePage: FC = () => {
   );
   const [loading, setLoading] = useState(false);
 
-  const onSubmit = (values: QuizFormValues) => {
-    // Instead of submitting directly, show the modal
-    setPendingValues(values);
-    setShowBankModal(true);
-  };
-
-  const handleCreateQuiz = async (saveToBank: boolean) => {
-    if (!pendingValues) return;
-
+  const onSubmit = async (values: QuizFormValues) => {
     setLoading(true);
     try {
       const quizData = {
-        name: pendingValues.name,
-        questions: pendingValues.questions,
+        name: values.name,
+        questions: values.questions,
       };
 
-      // 1. Create the quiz itself
+      // 1. Create the quiz itself first
       await quizService.createQuiz(quizData);
-
-      // 2. Optionally save questions to the bank
-      if (saveToBank) {
-        await questionService.postNewQuestions(pendingValues.questions);
-      }
-
       showNotification(
-        `Quiz "${pendingValues.name}" created successfully${saveToBank ? ' and questions added to bank' : ''}!`,
+        `Quiz "${values.name}" created successfully!`,
         'success'
       );
-      navigate('/');
+
+      // 2. Prepare for bank modal
+      setPendingValues(values);
+      setShowBankModal(true);
     } catch (error) {
       console.error('Error creating quiz:', error);
       showNotification('Failed to create quiz. Please try again.', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveToBank = async () => {
+    if (!pendingValues) return;
+
+    setLoading(true);
+    try {
+      const response = await questionService.postNewQuestions(
+        pendingValues.questions
+      );
+
+      const added = response.addedCount;
+      const skipped = response.skippedCount;
+
+      if (added > 0 && skipped > 0) {
+        showNotification(
+          `Bank Updated: ${added} added, ${skipped} skipped (duplicates)`,
+          'info'
+        );
+      } else if (added > 0) {
+        showNotification(`Bank Updated: ${added} questions added!`, 'success');
+      } else if (skipped > 0) {
+        showNotification(
+          `No new questions added (all ${skipped} already exist in bank)`,
+          'warning'
+        );
+      } else {
+        showNotification('Bank update complete.', 'success');
+      }
+      navigate('/');
+    } catch (error) {
+      console.error('Error saving to bank:', error);
+      showNotification('Failed to save questions to bank.', 'error');
+      // Still navigate away since quiz was created
+      navigate('/');
+    } finally {
+      setLoading(false);
       setShowBankModal(false);
     }
+  };
+
+  const handleSkipBank = () => {
+    setShowBankModal(false);
+    navigate('/');
   };
 
   return (
@@ -64,21 +96,21 @@ const QuizCreatePage: FC = () => {
 
       <Modal
         open={showBankModal}
-        onClose={() => !loading && setShowBankModal(false)}
+        onClose={handleSkipBank}
         title="Question Bank"
         confirmText="Yes, Save to Bank"
-        cancelText="No, Just Create Quiz"
-        onConfirm={() => handleCreateQuiz(true)}
-        onCancel={() => handleCreateQuiz(false)}
+        cancelText="Maybe Later"
+        onConfirm={handleSaveToBank}
+        onCancel={handleSkipBank}
         loading={loading}
       >
         <PreviewText
-          text="Do you want to save these questions in the bank for future recycling and reusing in other quizzes?"
-          sx={{ mb: 1 }}
+          text="Nice! Your quiz is ready. Do you also want to save these questions in the bank for future use?"
+          sx={{ mb: 1, fontWeight: 600 }}
         />
         <PreviewText
           variant="caption"
-          text="Selecting 'No' will still create the quiz, but these questions won't appear in the 'Recycle Questions' selector later."
+          text="Saving them to the bank allows you to 'Recycle' them when creating other quizzes."
           sx={{ color: 'text.secondary', display: 'block' }}
         />
       </Modal>
