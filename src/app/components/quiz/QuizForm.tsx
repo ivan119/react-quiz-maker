@@ -144,11 +144,7 @@ const QuizForm = ({
         label: 'Question',
         minWidth: 250,
         format: (value: string) => (
-          <PreviewText
-            text={value}
-            variant="body2"
-            sx={{ fontWeight: 500 }}
-          />
+          <PreviewText text={value} variant="body2" sx={{ fontWeight: 500 }} />
         ),
       },
       {
@@ -156,11 +152,7 @@ const QuizForm = ({
         label: 'Answer',
         minWidth: 250,
         format: (value: string) => (
-          <PreviewText
-            text={value}
-            variant="body2"
-            color="text.secondary"
-          />
+          <PreviewText text={value} variant="body2" color="text.secondary" />
         ),
       },
       {
@@ -380,7 +372,6 @@ const QuizForm = ({
                     variant="outlined"
                     size="large"
                     onClick={() => setIsRecycleModalOpen(true)}
-                    sx={{ borderRadius: 3, px: 4 }}
                   />
                   <Button
                     title="Add New Question"
@@ -392,7 +383,6 @@ const QuizForm = ({
                       setEditingIndex(null);
                       setIsQuestionModalOpen(true);
                     }}
-                    sx={{ borderRadius: 3, px: 4 }}
                   />
                 </Box>
               </Paper>
