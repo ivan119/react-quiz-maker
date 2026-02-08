@@ -36,7 +36,7 @@ const QuizTable = ({
       minWidth: 170,
       format: (value, row) => (
         <Box>
-          <PreviewText variant="subtitle1" text={value} />
+          <PreviewText variant="subtitle1" text={value} useLimit={true} />
           <PreviewText
             variant="caption"
             color="text.secondary"
