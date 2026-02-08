@@ -7,29 +7,32 @@ import { Modal } from '../components/ui/Modal';
 import { Button, PreviewText } from '../components/ui';
 import QuizTable from '../components/quiz/QuizTable';
 import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
 
 const QuizListPage = () => {
   const [quizzes, setQuizzes] = useState<QuizDetail[]>([]);
   const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [deleteItem, setDeleteItem] = useState<QuizDetail | null>(null);
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
+  const { showNotification } = useNotification();
 
   const loadQuizzes = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
       const data = await quizService.getAllQuizzes();
       setQuizzes(data);
     } catch (err) {
       console.error(err);
-      setError('Failed to load quizzes. Please try again later.');
+      showNotification(
+        'Failed to load quizzes. Please try again later.',
+        'error'
+      );
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showNotification]);
 
   const handleDelete = (item: QuizDetail) => {
     setDeleteItem(item);
@@ -40,13 +43,17 @@ const QuizListPage = () => {
     if (deleteItem) {
       try {
         await quizService.deleteQuiz(deleteItem.id as string);
+        const deletedName = deleteItem.name;
         setDeleteItem(null);
         setOpenModal(false);
         await loadQuizzes();
-        // TODO: Maybe add a snackbar to notify the user that the quiz was deleted successfully?
+        showNotification(
+          `Quiz "${deletedName}" deleted successfully`,
+          'success'
+        );
       } catch (error) {
         console.error('Error deleting quiz:', error);
-        alert('Failed to delete quiz');
+        showNotification('Failed to delete quiz. Please try again.', 'error');
       }
     }
   };
@@ -96,13 +103,6 @@ const QuizListPage = () => {
           limit={100}
         />
       </Modal>
-      {error && !loading && (
-        <PreviewText
-          text={error}
-          color="error"
-          sx={{ mt: 2, textAlign: 'center' }}
-        />
-      )}
     </Box>
   );
 };
