@@ -8,9 +8,24 @@ import {
   CircularProgress,
   Box,
   TablePagination,
+  TextField,
+  InputAdornment,
 } from '@mui/material';
-import { useState, useMemo, forwardRef, type ReactNode } from 'react';
+import {
+  Search as SearchIcon,
+  CheckBox as CheckBoxIcon,
+  CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon,
+} from '@mui/icons-material';
+import {
+  useState,
+  useMemo,
+  forwardRef,
+  type ReactNode,
+  useCallback,
+} from 'react';
 import { TableVirtuoso, type TableComponents } from 'react-virtuoso';
+import { PreviewText } from './PreviewText';
+import { Button } from './Button';
 
 export interface Column<T> {
   id: keyof T | string;
@@ -33,6 +48,22 @@ interface DataTableProps<T> {
   pagination?: boolean;
   initialRowsPerPage?: number;
   rowsPerPageOptions?: number[];
+  // Header options
+  title?: string;
+  actions?: ReactNode;
+  // Search options
+  searchable?: boolean;
+  searchFields?: (keyof T | string)[];
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  searchPlaceholder?: string;
+  // Selection options
+  selectedIds?: Set<string | number>;
+  onSelectionChange?: (ids: Set<string | number>) => void;
+  isRowSelectable?: (row: T) => boolean;
+  showSelectionAction?: boolean;
+  // Row styling
+  getRowSx?: (row: T) => any;
 }
 
 export const DataTable = <T extends { id?: string | number }>({
@@ -46,11 +77,38 @@ export const DataTable = <T extends { id?: string | number }>({
   pagination = true,
   initialRowsPerPage = 25,
   rowsPerPageOptions = [10, 25, 50, 100],
+  title,
+  actions,
+  searchValue: externalSearchValue,
+  onSearchChange,
+  searchPlaceholder = 'Search...',
+  searchable = false,
+  searchFields,
+  selectedIds,
+  onSelectionChange,
+  isRowSelectable,
+  showSelectionAction = false,
+  getRowSx,
 }: DataTableProps<T>) => {
+  const [internalSearchValue, setInternalSearchValue] = useState('');
   const [orderBy, setOrderBy] = useState<keyof T | string>('');
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(initialRowsPerPage);
+
+  const searchValue =
+    externalSearchValue !== undefined
+      ? externalSearchValue
+      : internalSearchValue;
+
+  const handleSearchChange = (value: string) => {
+    if (onSearchChange) {
+      onSearchChange(value);
+    } else {
+      setInternalSearchValue(value);
+    }
+    setPage(0);
+  };
 
   const handleRequestSort = (property: keyof T | string) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -69,10 +127,27 @@ export const DataTable = <T extends { id?: string | number }>({
     setPage(0);
   };
 
-  const sortedRows = useMemo(() => {
-    if (!orderBy) return rows;
+  // 1. Filter rows based on search
+  const filteredRows = useMemo(() => {
+    if (!searchable || !searchValue) return rows;
 
-    return [...rows].sort((a: any, b: any) => {
+    const query = searchValue.toLowerCase();
+    const fieldsToSearch = searchFields || columns.map((c) => c.id as string);
+
+    return rows.filter((row: any) => {
+      return fieldsToSearch.some((field) => {
+        const value = row[field];
+        if (value === null || value === undefined) return false;
+        return String(value).toLowerCase().includes(query);
+      });
+    });
+  }, [rows, searchable, searchValue, searchFields, columns]);
+
+  // 2. Sort the (filtered) rows
+  const sortedRows = useMemo(() => {
+    if (!orderBy) return filteredRows;
+
+    return [...filteredRows].sort((a: any, b: any) => {
       const aValue = a[orderBy];
       const bValue = b[orderBy];
 
@@ -84,9 +159,9 @@ export const DataTable = <T extends { id?: string | number }>({
       }
       return 0;
     });
-  }, [rows, orderBy, order]);
+  }, [filteredRows, orderBy, order]);
 
-  // Apply pagination if enabled
+  // 3. Apply pagination
   const displayRows = useMemo(() => {
     if (!pagination) return sortedRows;
     return sortedRows.slice(
@@ -122,11 +197,14 @@ export const DataTable = <T extends { id?: string | number }>({
       TableHead: forwardRef<HTMLTableSectionElement>((props, ref) => (
         <TableHead {...props} ref={ref} />
       )),
-      TableRow: ({ item: _item, ...props }) => (
+      TableRow: ({ item, ...props }) => (
         <TableRow
           {...props}
           hover
-          sx={{ cursor: canEdit ? 'pointer' : 'default' }}
+          sx={{
+            cursor: canEdit ? 'pointer' : 'default',
+            ...(getRowSx ? getRowSx(item) : {}),
+          }}
         />
       ),
       TableBody: forwardRef<HTMLTableSectionElement>((props, ref) => (
@@ -190,50 +268,178 @@ export const DataTable = <T extends { id?: string | number }>({
     );
   };
 
-  if (loading) {
-    return (
-      <Paper
-        sx={{ width: '100%', p: 4, display: 'flex', justifyContent: 'center', align:'center', height: 500 }}
-      >
-        <CircularProgress />
-      </Paper>
+  // Selection logic
+  const selectableVisibleRows = useMemo(() => {
+    return filteredRows.filter((row) =>
+      isRowSelectable ? isRowSelectable(row) : true
     );
-  }
+  }, [filteredRows, isRowSelectable]);
 
-  if (rows.length === 0) {
+  const isAllVisibleSelected = useMemo(() => {
+    if (!selectedIds || selectableVisibleRows.length === 0) return false;
+    return selectableVisibleRows.every(
+      (row) => row.id !== undefined && selectedIds.has(row.id)
+    );
+  }, [selectedIds, selectableVisibleRows]);
+
+  const handleToggleSelectAll = useCallback(() => {
+    if (!onSelectionChange || !selectedIds) return;
+
+    const next = new Set(selectedIds);
+    if (isAllVisibleSelected) {
+      selectableVisibleRows.forEach((row) => {
+        if (row.id !== undefined) next.delete(row.id);
+      });
+    } else {
+      selectableVisibleRows.forEach((row) => {
+        if (row.id !== undefined) next.add(row.id);
+      });
+    }
+    onSelectionChange(next);
+  }, [
+    isAllVisibleSelected,
+    onSelectionChange,
+    selectableVisibleRows,
+    selectedIds,
+  ]);
+
+  const renderHeader = () => {
+    if (!title && !actions && !searchable && !showSelectionAction) return null;
     return (
-      <Paper
+      <Box
         sx={{
-          width: '100%',
-          p: 4,
-          textAlign: 'center',
-          color: 'text.secondary',
+          p: 2.5,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderBottom: 1,
+          borderColor: 'divider',
+          gap: 2,
+          flexWrap: 'wrap',
         }}
       >
-        {emptyMessage}
-      </Paper>
+        <Box sx={{ flexShrink: 0 }}>
+          {title && (
+            <PreviewText
+              variant="h5"
+              component="h1"
+              sx={{ fontWeight: 800 }}
+              text={title}
+            />
+          )}
+        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 1.5,
+            flexGrow: 1,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}
+        >
+          {searchable && (
+            <TextField
+              size="small"
+              placeholder={searchPlaceholder}
+              value={searchValue}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              variant="outlined"
+              sx={{
+                width: { xs: '100%', sm: 300 },
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2.5,
+                  bgcolor: 'background.paper',
+                },
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" sx={{ fontSize: 20 }} />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          )}
+
+          {showSelectionAction && (
+            <Button
+              variant={isAllVisibleSelected ? 'contained' : 'outlined'}
+              size="small"
+              onClick={handleToggleSelectAll}
+              icon={
+                isAllVisibleSelected ? (
+                  <CheckBoxIcon />
+                ) : (
+                  <CheckBoxOutlineBlankIcon />
+                )
+              }
+              title={isAllVisibleSelected ? 'DESELECT' : 'SELECT ALL'}
+              sx={{
+                whiteSpace: 'nowrap',
+                minWidth: 'fit-content',
+                borderRadius: 3,
+                fontWeight: 800,
+                fontSize: '0.7rem',
+              }}
+            />
+          )}
+
+          {actions}
+        </Box>
+      </Box>
     );
-  }
+  };
 
   return (
-    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <TableVirtuoso
-        style={{ height }}
-        data={displayRows}
-        components={VirtuosoTableComponents}
-        fixedHeaderContent={fixedHeaderContent}
-        itemContent={rowContent}
-      />
-      {pagination && (
-        <TablePagination
-          rowsPerPageOptions={rowsPerPageOptions}
-          component="div"
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
+    <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: 3 }}>
+      {renderHeader()}
+      {loading ? (
+        <Box
+          sx={{
+            p: 8,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height,
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : displayRows.length === 0 ? (
+        <Box
+          sx={{
+            p: 8,
+            textAlign: 'center',
+            color: 'text.secondary',
+            height,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {searchValue ? 'No records match your search' : emptyMessage}
+        </Box>
+      ) : (
+        <>
+          <TableVirtuoso
+            style={{ height }}
+            data={displayRows}
+            components={VirtuosoTableComponents}
+            fixedHeaderContent={fixedHeaderContent}
+            itemContent={rowContent}
+          />
+          {pagination && (
+            <TablePagination
+              rowsPerPageOptions={rowsPerPageOptions}
+              component="div"
+              count={filteredRows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          )}
+        </>
       )}
     </Paper>
   );
