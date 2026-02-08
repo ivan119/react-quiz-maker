@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import QuizForm from '../components/quiz/QuizForm';
 import type { QuizFormValues } from '../lib/validators/quiz.schema';
 import { quizService } from '../../api';
 import { Box, CircularProgress } from '@mui/material';
 import { PreviewText } from '../components/ui';
-const QuizEditPage = () => {
+import { useNotification } from '../context/NotificationContext';
+
+const QuizEditPage: FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { showNotification } = useNotification();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [defaultValues, setDefaultValues] = useState<QuizFormValues | null>(
@@ -47,7 +50,7 @@ const QuizEditPage = () => {
 
   const onSubmit = async (values: QuizFormValues) => {
     if (!id) {
-      alert('Quiz ID is missing');
+      showNotification('Quiz ID is missing', 'error');
       return;
     }
 
@@ -57,10 +60,14 @@ const QuizEditPage = () => {
         questions: values.questions,
       };
       await quizService.updateQuiz(id, quizData);
+      showNotification(
+        `Quiz "${values.name}" updated successfully!`,
+        'success'
+      );
       navigate('/');
     } catch (error) {
       console.error('Error updating quiz:', error);
-      alert('Failed to update quiz');
+      showNotification('Failed to update quiz. Please try again.', 'error');
     }
   };
 
