@@ -10,7 +10,7 @@ interface PreviewText extends TypographyProps {
 
 export const PreviewText = memo(function PreviewText({
   text = '',
-  limit = 50,
+  limit = 28,
   label,
   ...props
 }: PreviewText) {
