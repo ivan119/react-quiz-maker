@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
-import {  Box } from '@mui/material';
+import { Box } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { quizService, type QuizDetail } from '../../api';
 import { Modal } from '../components/ui/Modal';
 import { Button, PreviewText } from '../components/ui';
 import QuizTable from '../components/quiz/QuizTable';
+import { useAuth } from '../context/AuthContext';
 
 const QuizListPage = () => {
   const [quizzes, setQuizzes] = useState<QuizDetail[]>([]);
@@ -14,6 +15,7 @@ const QuizListPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteItem, setDeleteItem] = useState<QuizDetail | null>(null);
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
 
   const loadQuizzes = useCallback(async () => {
     setLoading(true);
@@ -64,12 +66,14 @@ const QuizListPage = () => {
         }}
       >
         <PreviewText variant="h4" component="h1" text="Quizzes" />
-        <Button
-          variant="contained"
-          icon={<AddIcon />}
-          onClick={() => navigate('/quiz/create')}
-          title="Create New Quiz"
-        />
+        {isAdmin && (
+          <Button
+            variant="contained"
+            icon={<AddIcon />}
+            onClick={() => navigate('/quiz/create')}
+            title="Create New Quiz"
+          />
+        )}
       </Box>
 
       <QuizTable

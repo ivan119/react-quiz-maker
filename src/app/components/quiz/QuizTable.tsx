@@ -5,6 +5,7 @@ import {
 } from '@mui/icons-material';
 import { DataTable, type Column, Button, PreviewText } from '../ui';
 import type { QuizDetail } from '../../../api';
+import { useAuth } from '../../context/AuthContext';
 
 type Props = {
   quizzes: QuizDetail[];
@@ -21,6 +22,8 @@ const QuizTable = ({
   onSolve,
   onDelete,
 }: Props) => {
+  const { isAdmin } = useAuth();
+
   const columns: Column<QuizDetail>[] = [
     {
       id: 'name',
@@ -52,13 +55,15 @@ const QuizTable = ({
             icon={<PlayIcon />}
             tooltip="Solve Quiz"
           />
-          <Button
-            isIconButton
-            color="error"
-            onClick={() => onDelete(row)}
-            icon={<DeleteIcon />}
-            tooltip="Delete Quiz"
-          />
+          {isAdmin && (
+            <Button
+              isIconButton
+              color="error"
+              onClick={() => onDelete(row)}
+              icon={<DeleteIcon />}
+              tooltip="Delete Quiz"
+            />
+          )}
         </Box>
       ),
     },
@@ -71,7 +76,7 @@ const QuizTable = ({
         rows={quizzes}
         loading={loading}
         height={600}
-        onRowClick={(row) => row.id && onEdit(row.id)}
+        onRowClick={(row) => isAdmin && row.id && onEdit(row.id)}
       />
     </Box>
   );
