@@ -150,7 +150,6 @@ const LoginPage: FC = () => {
                     fontSize: { xs: '0.85rem', md: '1rem' },
                     lineHeight: 1.6,
                   }}
-                  limit={200}
                 />
                 <Button
                   title={`Enter as ${item.title.charAt(0) + item.title.slice(1).toLowerCase()}`}

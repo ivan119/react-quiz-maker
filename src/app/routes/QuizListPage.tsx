@@ -92,7 +92,6 @@ const QuizListPage = () => {
         <PreviewText
           text={`Are you sure you want to delete this quiz?\nName: ${deleteItem?.name ?? ''}`}
           sx={{ whiteSpace: 'pre-line' }}
-          limit={100}
         />
       </Modal>
     </Box>

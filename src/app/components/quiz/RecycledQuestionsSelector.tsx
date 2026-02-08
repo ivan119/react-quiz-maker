@@ -119,7 +119,6 @@ export const RecycledQuestionsSelector = ({
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <PreviewText
                 text={value}
-                limit={60}
                 variant="body2"
                 sx={{ fontWeight: 600 }}
               />
@@ -149,7 +148,6 @@ export const RecycledQuestionsSelector = ({
         format: (value: string): ReactNode => (
           <PreviewText
             text={value}
-            limit={60}
             variant="body2"
             color="text.secondary"
           />
@@ -182,7 +180,6 @@ export const RecycledQuestionsSelector = ({
         <PreviewText
           text="Create and save a quiz with some questions first to build your question bank for recycling!"
           variant="body2"
-          limit={100}
           color="text.secondary"
         />
       </Box>

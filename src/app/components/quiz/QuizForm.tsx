@@ -146,7 +146,6 @@ const QuizForm = ({
         format: (value: string) => (
           <PreviewText
             text={value}
-            limit={80}
             variant="body2"
             sx={{ fontWeight: 500 }}
           />
@@ -159,7 +158,6 @@ const QuizForm = ({
         format: (value: string) => (
           <PreviewText
             text={value}
-            limit={80}
             variant="body2"
             color="text.secondary"
           />
