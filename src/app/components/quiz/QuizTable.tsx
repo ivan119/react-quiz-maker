@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { Box } from '@mui/material';
 import {
   Delete as DeleteIcon,
@@ -13,6 +14,8 @@ type Props = {
   onEdit: (id: string) => void;
   onSolve: (id: string) => void;
   onDelete: (item: QuizDetail) => void;
+  title?: string;
+  actions?: ReactNode;
 };
 
 const QuizTable = ({
@@ -21,6 +24,8 @@ const QuizTable = ({
   onEdit,
   onSolve,
   onDelete,
+  title,
+  actions,
 }: Props) => {
   const { isAdmin } = useAuth();
 
@@ -72,6 +77,8 @@ const QuizTable = ({
   return (
     <Box sx={{ opacity: loading ? 0.7 : 1 }}>
       <DataTable<QuizDetail>
+        title={title}
+        actions={actions}
         columns={columns}
         rows={quizzes}
         loading={loading}

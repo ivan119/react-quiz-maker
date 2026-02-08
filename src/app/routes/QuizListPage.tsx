@@ -64,26 +64,18 @@ const QuizListPage = () => {
 
   return (
     <Box>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 3,
-        }}
-      >
-        <PreviewText variant="h4" component="h1" text="Quizzes" />
-        {isAdmin && (
-          <Button
-            variant="contained"
-            icon={<AddIcon />}
-            onClick={() => navigate('/quiz/create')}
-            title="Create New Quiz"
-          />
-        )}
-      </Box>
-
       <QuizTable
+        title="Quizzes"
+        actions={
+          isAdmin && (
+            <Button
+              variant="contained"
+              icon={<AddIcon />}
+              onClick={() => navigate('/quiz/create')}
+              title="Create New Quiz"
+            />
+          )
+        }
         quizzes={quizzes}
         loading={loading}
         onEdit={(id) => navigate(`/quiz/${id}/edit`)}
