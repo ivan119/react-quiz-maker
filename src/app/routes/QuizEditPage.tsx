@@ -67,7 +67,11 @@ const QuizEditPage: FC = () => {
       navigate('/');
     } catch (error) {
       console.error('Error updating quiz:', error);
-      showNotification('Failed to update quiz. Please try again.', 'error');
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to update quiz. Please try again.';
+      showNotification(message, 'error');
     }
   };
 

@@ -36,7 +36,11 @@ const QuizCreatePage: FC = () => {
       setShowBankModal(true);
     } catch (error) {
       console.error('Error creating quiz:', error);
-      showNotification('Failed to create quiz. Please try again.', 'error');
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to create quiz. Please try again.';
+      showNotification(message, 'error');
     } finally {
       setLoading(false);
     }

@@ -22,6 +22,15 @@ const setStoredQuestions = (questions: Question[]) => {
   localStorage.setItem(QUESTIONS_KEY, JSON.stringify(questions));
 };
 
+const isQuizNameTaken = (name: string, excludeId?: string): boolean => {
+  const quizzes = getStoredQuizzes();
+  return quizzes.some(
+    (q) =>
+      q.name.trim().toLowerCase() === name.trim().toLowerCase() &&
+      q.id !== excludeId
+  );
+};
+
 export const handlers = [
   http.get('/quizzes', () => {
     return HttpResponse.json(getStoredQuizzes());
@@ -44,6 +53,13 @@ export const handlers = [
   http.post('/quizzes', async ({ request }) => {
     const input = (await request.json()) as QuizCreateInput;
     const quizzes = getStoredQuizzes();
+
+    if (isQuizNameTaken(input.name)) {
+      return HttpResponse.json(
+        { message: `A quiz with the name "${input.name}" already exists.` },
+        { status: 400 }
+      );
+    }
 
     const newQuestions: Question[] = [];
 
@@ -78,6 +94,15 @@ export const handlers = [
       return new HttpResponse(null, { status: 400 });
     }
     if (quizIndex === -1) return new HttpResponse(null, { status: 404 });
+
+    if (isQuizNameTaken(input.name, id)) {
+      return HttpResponse.json(
+        {
+          message: `Another quiz with the name "${input.name}" already exists.`,
+        },
+        { status: 400 }
+      );
+    }
 
     const updatedQuestions = input.questions.map((q: Question) => ({
       question: q.question,

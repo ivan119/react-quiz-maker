@@ -16,10 +16,7 @@ export const quizService = {
     return request<QuizDetail>(`/quizzes/${id}`);
   },
 
-  updateQuiz: async (
-    id: string,
-    input: QuizCreateInput
-  ): Promise<Quiz> => {
+  updateQuiz: async (id: string, input: QuizCreateInput): Promise<Quiz> => {
     return request<Quiz>(`/quizzes/${id}`, {
       method: 'PUT',
       body: JSON.stringify(input),
@@ -30,5 +27,18 @@ export const quizService = {
     await request<void>(`/quizzes/${id}`, {
       method: 'DELETE',
     });
+  },
+
+  validateQuizName: async (
+    name: string,
+    excludeId?: string
+  ): Promise<{ isTaken: boolean }> => {
+    const quizzes = await quizService.getAllQuizzes();
+    const isTaken = quizzes.some(
+      (q) =>
+        q.name.trim().toLowerCase() === name.trim().toLowerCase() &&
+        q.id !== excludeId
+    );
+    return { isTaken };
   },
 };
