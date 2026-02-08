@@ -4,6 +4,7 @@ import { memo } from 'react';
 interface PreviewText extends TypographyProps {
   text?: string;
   limit?: number;
+  useLimit?: boolean;
   label?: string;
   to?: string;
 }
@@ -11,10 +12,12 @@ interface PreviewText extends TypographyProps {
 export const PreviewText = memo(function PreviewText({
   text = '',
   limit = 28,
+  useLimit = false,
   label,
   ...props
 }: PreviewText) {
-  const display = text.length > limit ? `${text.slice(0, limit)}…` : text;
+  const display =
+    useLimit && text.length > limit ? `${text.slice(0, limit)}…` : text;
   return (
     <Typography {...props}>
       {label && <strong>{label}: </strong>}
