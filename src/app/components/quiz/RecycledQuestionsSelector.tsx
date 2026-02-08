@@ -5,17 +5,18 @@ import {
   useCallback,
   type ReactNode,
 } from 'react';
-import { Box, Checkbox, TextField, InputAdornment, Chip } from '@mui/material';
+import { Box, Checkbox, Chip, FormControlLabel, Switch } from '@mui/material';
 import {
-  Search as SearchIcon,
   History as HistoryIcon,
   CheckBox as CheckBoxIcon,
   CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon,
   Close as CloseIcon,
+  FilterList as FilterListIcon,
+  FilterListOff as FilterListOffIcon,
 } from '@mui/icons-material';
 import { questionService } from '../../../api';
 import { type Question } from '../../../shared/types/quiz';
-import { PreviewText, Button, DataTable, type Column } from '../ui';
+import { PreviewText, DataTable, type Column } from '../ui';
 
 interface Props {
   onSelect: (questions: Question[]) => void;
@@ -28,8 +29,11 @@ export const RecycledQuestionsSelector = ({
 }: Props) => {
   const [allQuestions, setAllQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
+    new Set()
+  );
+
+  const [hideInQuiz, setHideInQuiz] = useState(false);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -45,21 +49,11 @@ export const RecycledQuestionsSelector = ({
     fetchQuestions();
   }, []);
 
-  const filteredQuestions = useMemo(() => {
-    if (!search.trim()) return allQuestions;
-    const lowerSearch = search.toLowerCase();
-    return allQuestions.filter(
-      (q) =>
-        q.question.toLowerCase().includes(lowerSearch) ||
-        q.answer.toLowerCase().includes(lowerSearch)
-    );
-  }, [allQuestions, search]);
-
   const selectedQuestions = useMemo(() => {
     return allQuestions.filter((q) => q.id && selectedIds.has(q.id));
   }, [allQuestions, selectedIds]);
 
-  const toggleSelection = useCallback((id: string) => {
+  const toggleSelection = useCallback((id: string | number) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -84,31 +78,10 @@ export const RecycledQuestionsSelector = ({
     [existingQuestions]
   );
 
-  // Only count selectable questions (not already in quiz)
-  const selectableQuestions = useMemo(
-    () => filteredQuestions.filter((q) => !isQuestionInQuiz(q)),
-    [filteredQuestions, isQuestionInQuiz]
-  );
-
-  const isAllSelected =
-    selectableQuestions.length > 0 &&
-    selectableQuestions.every((q) => q.id && selectedIds.has(q.id));
-
-  const toggleSelectAll = () => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (isAllSelected) {
-        selectableQuestions.forEach((q) => {
-          if (q.id) next.delete(q.id);
-        });
-      } else {
-        selectableQuestions.forEach((q) => {
-          if (q.id) next.add(q.id);
-        });
-      }
-      return next;
-    });
-  };
+  const displayQuestions = useMemo(() => {
+    if (!hideInQuiz) return allQuestions;
+    return allQuestions.filter((q) => !isQuestionInQuiz(q));
+  }, [allQuestions, hideInQuiz, isQuestionInQuiz]);
 
   const columns: Column<Question>[] = useMemo(
     () => [
@@ -141,12 +114,7 @@ export const RecycledQuestionsSelector = ({
         label: 'Question',
         minWidth: 250,
         format: (value: string, row: Question): ReactNode => {
-          const isInQuiz = existingQuestions.some(
-            (eq) =>
-              (row.id && eq.id === row.id) ||
-              eq.question.trim().toLowerCase() ===
-                row.question.trim().toLowerCase()
-          );
+          const isInQuiz = isQuestionInQuiz(row);
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <PreviewText
@@ -157,7 +125,7 @@ export const RecycledQuestionsSelector = ({
               />
               {isInQuiz && (
                 <Chip
-                  label="Already in Quiz"
+                  label="In Quiz"
                   size="small"
                   color="success"
                   variant="outlined"
@@ -230,69 +198,56 @@ export const RecycledQuestionsSelector = ({
         gap: 2.5,
       }}
     >
-      {/* Search & Select All Panel */}
-      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-        <TextField
-          fullWidth
-          placeholder="Search question bank..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          variant="outlined"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: 'primary.main', opacity: 0.7 }} />
-              </InputAdornment>
-            ),
-          }}
-          size="small"
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 3,
-              bgcolor: 'background.paper',
-              transition: 'all 0.2s ease',
-              '&:hover': {
-                bgcolor: 'rgba(var(--mui-palette-primary-mainChannel), 0.01)',
-              },
-              '&.Mui-focused': {
-                boxShadow:
-                  '0 0 0 4px rgba(var(--mui-palette-primary-mainChannel), 0.1)',
-              },
-            },
-          }}
-        />
-        <Button
-          variant={isAllSelected ? 'contained' : 'outlined'}
-          size="small"
-          onClick={toggleSelectAll}
-          icon={isAllSelected ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
-          title={isAllSelected ? 'DESELECT' : 'SELECT ALL'}
-          sx={{
-            whiteSpace: 'nowrap',
-            minWidth: 'fit-content',
-            borderRadius: 3,
-            fontWeight: 800,
-            fontSize: '0.7rem',
-          }}
-        />
-      </Box>
+      <DataTable<Question>
+        searchable
+        searchFields={['question', 'answer']}
+        searchPlaceholder="Search question bank..."
+        showSelectionAction
+        selectedIds={selectedIds}
+        onSelectionChange={setSelectedIds}
+        isRowSelectable={(row) => !isQuestionInQuiz(row)}
+        getRowSx={(row) =>
+          isQuestionInQuiz(row)
+            ? { bgcolor: 'rgba(0,0,0,0.02)', opacity: 0.6 }
+            : {}
+        }
+        actions={
+          <FormControlLabel
+            control={
+              <Switch
+                size="small"
+                checked={hideInQuiz}
+                onChange={(e) => setHideInQuiz(e.target.checked)}
+              />
+            }
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                {hideInQuiz ? (
+                  <FilterListIcon sx={{ fontSize: 16 }} />
+                ) : (
+                  <FilterListOffIcon sx={{ fontSize: 16 }} />
+                )}
+                <PreviewText
+                  text="Hide Added"
+                  variant="caption"
+                  sx={{ fontWeight: 700, textTransform: 'uppercase' }}
+                />
+              </Box>
+            }
+            sx={{ ml: 1, mr: 0 }}
+          />
+        }
+        columns={columns}
+        rows={displayQuestions}
+        canEdit={true}
+        height={320}
+        loading={loading}
+        emptyMessage="No questions match your search."
+        onRowClick={(row) => {
+          if (row.id && !isQuestionInQuiz(row)) toggleSelection(row.id);
+        }}
+      />
 
-      {/* DataTable */}
-      <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
-        <DataTable
-          columns={columns}
-          rows={filteredQuestions}
-          canEdit={true}
-          height={320}
-          loading={loading}
-          emptyMessage="No questions match your search."
-          onRowClick={(row) => {
-            if (row.id && !isQuestionInQuiz(row)) toggleSelection(row.id);
-          }}
-        />
-      </Box>
-
-      {/* Selection Summary Tray */}
       <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
           <HistoryIcon sx={{ fontSize: 16, color: 'primary.main' }} />
