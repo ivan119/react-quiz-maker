@@ -291,53 +291,29 @@ const QuizForm = ({
 
           <Divider sx={{ my: 2 }} />
 
-          {fields.length > 0 && (
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                mb: 2,
-              }}
-            >
-              <Box>
-                <PreviewText variant="h6" text="Questions" />
-                {(errors.questions?.message ||
-                  errors.questions?.root?.message) && (
-                  <PreviewText
-                    variant="caption"
-                    color="error"
-                    text={
-                      errors.questions?.message ||
-                      errors.questions?.root?.message
-                    }
-                  />
-                )}
-              </Box>
-
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
-                  icon={<HistoryIcon />}
-                  variant="outlined"
-                  size="small"
-                  onClick={() => setIsRecycleModalOpen(true)}
-                  title="Recycle"
-                />
-                <AddQuestionButton
-                  control={control}
-                  onAdd={() => {
-                    addQuestionMethods.reset({ question: '', answer: '' });
-                    setEditingIndex(null);
-                    setIsQuestionModalOpen(true);
-                  }}
-                />
-              </Box>
-            </Box>
-          )}
-
           <Box sx={{ mb: 2 }}>
             {fields.length > 0 ? (
               <DataTable
+                title="Questions"
+                actions={
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      icon={<HistoryIcon />}
+                      variant="outlined"
+                      size="small"
+                      onClick={() => setIsRecycleModalOpen(true)}
+                      title="Recycle"
+                    />
+                    <AddQuestionButton
+                      control={control}
+                      onAdd={() => {
+                        addQuestionMethods.reset({ question: '', answer: '' });
+                        setEditingIndex(null);
+                        setIsQuestionModalOpen(true);
+                      }}
+                    />
+                  </Box>
+                }
                 columns={columns}
                 rows={tableRows}
                 canEdit={true}
