@@ -70,6 +70,7 @@ const QuizTable = ({
         columns={columns}
         rows={quizzes}
         loading={loading}
+        height={600}
         onRowClick={(row) => row.id && onEdit(row.id)}
       />
     </Box>

@@ -341,6 +341,7 @@ const QuizForm = ({
                 columns={columns}
                 rows={tableRows}
                 canEdit={true}
+                height={300}
                 emptyMessage="No questions added yet. Click 'Add Question' or 'Recycle' to start!"
                 onRowClick={(_row: any, index?: number) => {
                   if (index !== undefined) {

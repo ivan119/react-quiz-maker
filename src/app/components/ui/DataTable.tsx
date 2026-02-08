@@ -193,7 +193,7 @@ export const DataTable = <T extends { id?: string | number }>({
   if (loading) {
     return (
       <Paper
-        sx={{ width: '100%', p: 4, display: 'flex', justifyContent: 'center' }}
+        sx={{ width: '100%', p: 4, display: 'flex', justifyContent: 'center', align:'center', height: 500 }}
       >
         <CircularProgress />
       </Paper>
