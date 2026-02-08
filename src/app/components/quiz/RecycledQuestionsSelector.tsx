@@ -5,14 +5,7 @@ import {
   useCallback,
   type ReactNode,
 } from 'react';
-import {
-  Box,
-  Checkbox,
-  CircularProgress,
-  TextField,
-  InputAdornment,
-  Chip,
-} from '@mui/material';
+import { Box, Checkbox, TextField, InputAdornment, Chip } from '@mui/material';
 import {
   Search as SearchIcon,
   History as HistoryIcon,
@@ -198,15 +191,7 @@ export const RecycledQuestionsSelector = ({
     [selectedIds, isQuestionInQuiz, toggleSelection]
   );
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (allQuestions.length === 0) {
+  if (allQuestions.length === 0 && !loading) {
     return (
       <Box
         sx={{
@@ -299,6 +284,7 @@ export const RecycledQuestionsSelector = ({
           rows={filteredQuestions}
           canEdit={true}
           height={320}
+          loading={loading}
           emptyMessage="No questions match your search."
           onRowClick={(row) => {
             if (row.id && !isQuestionInQuiz(row)) toggleSelection(row.id);
