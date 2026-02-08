@@ -329,7 +329,7 @@ const QuizForm = ({
             ) : (
               <Paper
                 sx={{
-                  p: 4,
+                  p: 6,
                   borderRadius: 3,
                   border: '2px dashed',
                   borderColor:
@@ -340,18 +340,19 @@ const QuizForm = ({
                     errors.questions?.message || errors.questions?.root?.message
                       ? 'rgba(var(--mui-palette-error-mainChannel), 0.04)'
                       : 'background.paper',
+                  textAlign: 'center',
                 }}
               >
-                <Box sx={{ mb: 2 }}>
+                <Box sx={{ mb: 4 }}>
                   <PreviewText
-                    variant="h6"
-                    sx={{ fontWeight: 700, mb: 1 }}
+                    variant="h5"
+                    sx={{ fontWeight: 800, mb: 1 }}
                     text="Add Your First Question"
                   />
                   <PreviewText
-                    variant="body2"
+                    variant="body1"
                     color="text.secondary"
-                    text="Start building your quiz by adding your first question below, or recycle from your history."
+                    text="Start building your quiz by picking questions from the bank or creating new ones."
                   />
                   {(errors.questions?.message ||
                     errors.questions?.root?.message) && (
@@ -367,47 +368,33 @@ const QuizForm = ({
                   )}
                 </Box>
 
-                <FormInput<{ question: string; answer: string }>
-                  name="question"
-                  control={addQuestionMethods.control}
-                  multiline
-                  rows={3}
-                  label="Question Text"
-                  placeholder="What is gravity?"
-                />
-                <FormInput<{ question: string; answer: string }>
-                  name="answer"
-                  control={addQuestionMethods.control}
-                  multiline
-                  rows={2}
-                  label="Correct Answer"
-                  placeholder="A fundamental force of nature"
-                />
-
                 <Box
                   sx={{
                     display: 'flex',
-                    gap: 2,
-                    justifyContent: 'flex-end',
-                    mt: 2,
+                    gap: 2.5,
+                    justifyContent: 'center',
+                    flexWrap: 'wrap',
                   }}
                 >
                   <Button
                     title="Recycle from Bank"
                     icon={<HistoryIcon />}
                     variant="outlined"
+                    size="large"
                     onClick={() => setIsRecycleModalOpen(true)}
+                    sx={{ borderRadius: 3, px: 4 }}
                   />
                   <Button
-                    title="Add Question"
+                    title="Add New Question"
                     icon={<AddIcon />}
-                    onClick={async () => {
-                      const isValid = await addQuestionMethods.trigger();
-                      if (isValid) {
-                        append(addQuestionMethods.getValues());
-                        addQuestionMethods.reset({ question: '', answer: '' });
-                      }
+                    variant="contained"
+                    size="large"
+                    onClick={() => {
+                      addQuestionMethods.reset({ question: '', answer: '' });
+                      setEditingIndex(null);
+                      setIsQuestionModalOpen(true);
                     }}
+                    sx={{ borderRadius: 3, px: 4 }}
                   />
                 </Box>
               </Paper>
