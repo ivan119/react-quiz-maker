@@ -25,11 +25,12 @@ import {
 } from '../ui';
 import {
   quizSchema,
+  questionSchema,
   type QuizFormValues,
+  type QuestionFormValues,
 } from '../../lib/validators/quiz.schema';
 import { type Question } from '../../../shared/types/quiz';
 import { useNotification } from '../../context/NotificationContext';
-import { z } from 'zod';
 
 const RecycledQuestionsSelector = lazy(() =>
   import('./RecycledQuestionsSelector').then((module) => ({
@@ -96,13 +97,8 @@ const QuizForm = ({
     defaultValues,
   });
 
-  const addQuestionMethods = useForm<{ question: string; answer: string }>({
-    resolver: zodResolver(
-      z.object({
-        question: z.string().min(3, 'Question must be at least 3 characters'),
-        answer: z.string().min(3, 'Answer must be at least 3 characters'),
-      })
-    ),
+  const addQuestionMethods = useForm<QuestionFormValues>({
+    resolver: zodResolver(questionSchema),
     defaultValues: { question: '', answer: '' },
   });
 
