@@ -160,36 +160,6 @@ export const RecycledQuestionsSelector = ({
     ],
     [selectedIds, isQuestionInQuiz, toggleSelection]
   );
-
-  if (allQuestions.length === 0 && !loading) {
-    return (
-      <Box
-        sx={{
-          textAlign: 'center',
-          p: 6,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 2,
-        }}
-      >
-        <HistoryIcon
-          sx={{ fontSize: 48, color: 'text.disabled', opacity: 0.5 }}
-        />
-        <PreviewText
-          text="Your question history is empty."
-          variant="h6"
-          sx={{ fontWeight: 600, color: 'text.primary' }}
-        />
-        <PreviewText
-          text="Create and save a quiz with some questions first to build your question bank for recycling!"
-          variant="body2"
-          color="text.secondary"
-        />
-      </Box>
-    );
-  }
-
   return (
     <Box
       sx={{
@@ -239,7 +209,7 @@ export const RecycledQuestionsSelector = ({
         canEdit={true}
         height={320}
         loading={loading}
-        emptyMessage="No questions match your search."
+        emptyMessage="Your question bank is empty. Save a quiz first to collect questions here!"
         onRowClick={(row) => {
           if (row.id && !isQuestionInQuiz(row)) toggleSelection(row.id);
         }}
