@@ -5,7 +5,7 @@ import {
   IconButton as MuiIconButton,
   Tooltip,
 } from '@mui/material';
-import { type ReactNode } from 'react';
+import { type ReactNode, useRef } from 'react';
 
 // Extend MUI Button props but make some more explicit/restricted if needed
 // or just pass them through. User wants specific props.
@@ -34,14 +34,30 @@ export const Button = ({
   startIcon,
   tooltip,
   isIconButton,
+  onClick,
   ...props
 }: ButtonProps) => {
+  const isProcessingRef = useRef(false);
+
+  const handleThrottledClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (isProcessingRef.current) return;
+
+    isProcessingRef.current = true;
+    onClick?.(event);
+
+    // Allow clicking again after 500ms
+    setTimeout(() => {
+      isProcessingRef.current = false;
+    }, 500);
+  };
+
   if (isIconButton) {
     const iconButtonNode = (
       <MuiIconButton
         color={color}
         disabled={disabled || isLoading}
         aria-label={props['aria-label'] || tooltip || title}
+        onClick={handleThrottledClick}
         {...(props as any)}
       >
         {isLoading ? <CircularProgress size={20} color="inherit" /> : icon}
@@ -60,6 +76,7 @@ export const Button = ({
       variant={variant}
       color={color}
       disabled={disabled || isLoading}
+      onClick={handleThrottledClick}
       startIcon={
         !isIconButton &&
         (isLoading ? (
