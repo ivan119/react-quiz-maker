@@ -1,27 +1,44 @@
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import MainLayout from './components/Layout/Main';
-import QuizCreatePage from './routes/QuizCreatePage';
-import QuizEditPage from './routes/QuizEditPage';
-import QuizListPage from './routes/QuizListPage';
-import LoginPage from './routes/LoginPage';
-import QuizSolvePage from './routes/QuizSolvePage';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
+import { Box, CircularProgress } from '@mui/material';
+
+// Lazy load pages - splitting them into separate chunks
+const QuizCreatePage = lazy(() => import('./routes/QuizCreatePage'));
+const QuizEditPage = lazy(() => import('./routes/QuizEditPage'));
+const QuizListPage = lazy(() => import('./routes/QuizListPage'));
+const LoginPage = lazy(() => import('./routes/LoginPage'));
+const QuizSolvePage = lazy(() => import('./routes/QuizSolvePage'));
+
+// Simple loader for the splitting transition
+const PageLoader = () => (
+  <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+    <CircularProgress />
+  </Box>
+);
+
+const withSuspense = (Component: React.ComponentType) => (
+  <Suspense fallback={<PageLoader />}>
+    <Component />
+  </Suspense>
+);
 
 export const router = createBrowserRouter([
   {
     path: '/login',
-    element: <LoginPage />,
+    element: withSuspense(LoginPage),
   },
   {
     element: <MainLayout />,
     children: [
-      { path: '/', element: <QuizListPage /> },
-      { path: '/quiz/:id/solve', element: <QuizSolvePage /> },
+      { path: '/', element: withSuspense(QuizListPage) },
+      { path: '/quiz/:id/solve', element: withSuspense(QuizSolvePage) },
       {
         element: <ProtectedRoute />,
         children: [
-          { path: '/quiz/create', element: <QuizCreatePage /> },
-          { path: '/quiz/:id/edit', element: <QuizEditPage /> },
+          { path: '/quiz/create', element: withSuspense(QuizCreatePage) },
+          { path: '/quiz/:id/edit', element: withSuspense(QuizEditPage) },
         ],
       },
     ],
