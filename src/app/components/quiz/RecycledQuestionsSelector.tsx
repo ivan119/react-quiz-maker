@@ -83,6 +83,14 @@ export const RecycledQuestionsSelector = ({
     return allQuestions.filter((q) => !isQuestionInQuiz(q));
   }, [allQuestions, hideInQuiz, isQuestionInQuiz]);
 
+  const getQuestionRowSx = useCallback(
+    (row: Question) =>
+      isQuestionInQuiz(row)
+        ? { bgcolor: 'rgba(0,0,0,0.02)', opacity: 0.6 }
+        : {},
+    [isQuestionInQuiz]
+  );
+
   const columns: Column<Question>[] = useMemo(
     () => [
       {
@@ -146,11 +154,7 @@ export const RecycledQuestionsSelector = ({
         label: 'Answer',
         minWidth: 200,
         format: (value: string): ReactNode => (
-          <PreviewText
-            text={value}
-            variant="body2"
-            color="text.secondary"
-          />
+          <PreviewText text={value} variant="body2" color="text.secondary" />
         ),
       },
     ],
@@ -203,11 +207,7 @@ export const RecycledQuestionsSelector = ({
         selectedIds={selectedIds}
         onSelectionChange={setSelectedIds}
         isRowSelectable={(row) => !isQuestionInQuiz(row)}
-        getRowSx={(row) =>
-          isQuestionInQuiz(row)
-            ? { bgcolor: 'rgba(0,0,0,0.02)', opacity: 0.6 }
-            : {}
-        }
+        getRowSx={getQuestionRowSx}
         actions={
           <FormControlLabel
             control={
