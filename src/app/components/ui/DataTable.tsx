@@ -22,6 +22,7 @@ import {
   forwardRef,
   type ReactNode,
   useCallback,
+  useEffect,
 } from 'react';
 import { TableVirtuoso, type TableComponents } from 'react-virtuoso';
 import { PreviewText } from './PreviewText';
@@ -101,6 +102,16 @@ export const DataTable = <T extends { id?: string | number }>({
       ? externalSearchValue
       : internalSearchValue;
 
+  const [debouncedSearchValue, setDebouncedSearchValue] = useState(searchValue);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchValue(searchValue);
+    }, 369);
+
+    return () => clearTimeout(timer);
+  }, [searchValue]);
+
   const handleSearchChange = (value: string) => {
     if (onSearchChange) {
       onSearchChange(value);
@@ -129,9 +140,9 @@ export const DataTable = <T extends { id?: string | number }>({
 
   // 1. Filter rows based on search
   const filteredRows = useMemo(() => {
-    if (!searchable || !searchValue) return rows;
+    if (!searchable || !debouncedSearchValue) return rows;
 
-    const query = searchValue.toLowerCase();
+    const query = debouncedSearchValue.toLowerCase();
     const fieldsToSearch = searchFields || columns.map((c) => c.id as string);
 
     return rows.filter((row: any) => {
@@ -141,7 +152,7 @@ export const DataTable = <T extends { id?: string | number }>({
         return String(value).toLowerCase().includes(query);
       });
     });
-  }, [rows, searchable, searchValue, searchFields, columns]);
+  }, [rows, searchable, debouncedSearchValue, searchFields, columns]);
 
   // 2. Sort the (filtered) rows
   const sortedRows = useMemo(() => {
