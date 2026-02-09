@@ -139,12 +139,6 @@ const LoginPage: FC = () => {
               borderRadius: 2,
               background: adminRole.gradient,
               fontWeight: 600,
-              boxShadow: adminRole.shadow,
-              '&:hover': {
-                background: adminRole.color,
-                transform: 'scale(1.02)',
-              },
-              transition: 'all 0.2s',
             }}
           />
         </Paper>
