@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useState,
+  useMemo,
   type ReactNode,
   useCallback,
 } from 'react';
@@ -36,10 +37,13 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     setOpen(false);
   }, []);
 
+  const value = useMemo(
+    () => ({ showNotification, hideNotification }),
+    [showNotification, hideNotification]
+  );
+
   return (
-    <NotificationContext.Provider
-      value={{ showNotification, hideNotification }}
-    >
+    <NotificationContext.Provider value={value}>
       {children}
       <Snackbar
         open={open}
