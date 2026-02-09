@@ -8,6 +8,7 @@ import { QuizCompleted } from '../components/quiz/QuizCompleted';
 import { QuizSolver } from '../components/quiz/QuizSolver';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
+import { useQuizSharing } from '../hooks/useQuizSharing';
 
 const QuizSolvePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -104,10 +105,13 @@ const QuizSolvePage = () => {
     handleNext(newAnswers);
   }, [quiz, currentSlide, userAnswers, currentAnswer, handleNext]);
 
+  const { shareQuiz } = useQuizSharing();
+
   const handleShare = useCallback(() => {
-    navigator.clipboard.writeText(window.location.href);
-    showNotification('Quiz link copied to clipboard!', 'success');
-  }, [showNotification]);
+    if (id) {
+      shareQuiz(id);
+    }
+  }, [id, shareQuiz]);
 
   const handleRestart = useCallback(() => {
     setValidationResult(null);
