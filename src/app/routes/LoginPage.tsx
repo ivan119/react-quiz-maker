@@ -139,8 +139,62 @@ const LoginPage: FC = () => {
               borderRadius: 2,
               background: adminRole.gradient,
               fontWeight: 600,
+              mb: 2,
             }}
           />
+
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              width: '100%',
+              my: 2,
+              '&::before, &::after': {
+                content: '""',
+                flex: 1,
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+              },
+            }}
+          >
+            <PreviewText
+              variant="caption"
+              sx={{ px: 2, color: 'text.disabled', fontWeight: 600 }}
+              text="OR"
+            />
+          </Box>
+
+          <Box sx={{ mt: 1, mb: 1 }}>
+            <PreviewText
+              text="Want to solve quizzes?"
+              variant="subtitle2"
+              sx={{ fontWeight: 700, mb: 0.25 }}
+            />
+            <PreviewText
+              text="Enter as a guest to browse and solve available quizzes."
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: 2 }}
+            />
+            <Button
+              title="Proceed as Guest"
+              fullWidth
+              variant="outlined"
+              size="large"
+              onClick={() => navigate('/')}
+              sx={{
+                py: 1.5,
+                borderRadius: 2,
+                fontWeight: 600,
+                color: 'text.secondary',
+                borderColor: 'divider',
+                '&:hover': {
+                  borderColor: 'text.secondary',
+                  background: 'rgba(0,0,0,0.02)',
+                },
+              }}
+            />
+          </Box>
         </Paper>
       </Container>
     </Box>
