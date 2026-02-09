@@ -214,59 +214,65 @@ export const DataTable = <T extends { id?: string | number }>({
     [canEdit, getRowSx]
   );
 
-  const fixedHeaderContent = () => (
-    <TableRow>
-      {columns.map((column) => (
-        <TableCell
-          key={column.id.toString()}
-          align={column.align}
-          sx={{
-            minWidth: column.minWidth,
-            bgcolor: 'background.paper',
-            borderBottom: 1,
-            borderColor: 'divider',
-            position: 'sticky',
-            top: 0,
-            zIndex: 2,
-          }}
-          sortDirection={orderBy === column.id ? order : false}
-        >
-          {column.sortable !== false ? (
-            <TableSortLabel
-              active={orderBy === column.id}
-              direction={orderBy === column.id ? order : 'asc'}
-              onClick={() => handleRequestSort(column.id)}
-            >
-              {column.label}
-            </TableSortLabel>
-          ) : (
-            column.label
-          )}
-        </TableCell>
-      ))}
-    </TableRow>
+  const fixedHeaderContent = useCallback(
+    () => (
+      <TableRow>
+        {columns.map((column) => (
+          <TableCell
+            key={column.id.toString()}
+            align={column.align}
+            sx={{
+              minWidth: column.minWidth,
+              bgcolor: 'background.paper',
+              borderBottom: 1,
+              borderColor: 'divider',
+              position: 'sticky',
+              top: 0,
+              zIndex: 2,
+            }}
+            sortDirection={orderBy === column.id ? order : false}
+          >
+            {column.sortable !== false ? (
+              <TableSortLabel
+                active={orderBy === column.id}
+                direction={orderBy === column.id ? order : 'asc'}
+                onClick={() => handleRequestSort(column.id)}
+              >
+                {column.label}
+              </TableSortLabel>
+            ) : (
+              column.label
+            )}
+          </TableCell>
+        ))}
+      </TableRow>
+    ),
+    [columns, orderBy, order, handleRequestSort]
   );
 
-  const rowContent = (index: number, row: T) => {
-    // Calculate actual index for pagination
-    const actualIndex = pagination ? page * rowsPerPage + index : index;
-    return (
-      <>
-        {columns.map((column) => {
-          const value = (row as any)[column.id];
-          return (
-            <TableCell
-              key={column.id.toString()}
-              align={column.align}
-              onClick={() => onRowClick(row, actualIndex)}
-            >
-              {column.format ? column.format(value, row, actualIndex) : value}
-            </TableCell>
-          );
-        })}
-      </>
-    );
-  };
+  const rowContent = useCallback(
+    (index: number, row: T) => {
+      // Calculate actual index for pagination
+      const actualIndex = pagination ? page * rowsPerPage + index : index;
+      return (
+        <>
+          {columns.map((column) => {
+            const value = (row as any)[column.id];
+            return (
+              <TableCell
+                key={column.id.toString()}
+                align={column.align}
+                onClick={() => onRowClick(row, actualIndex)}
+              >
+                {column.format ? column.format(value, row, actualIndex) : value}
+              </TableCell>
+            );
+          })}
+        </>
+      );
+    },
+    [columns, pagination, page, rowsPerPage, onRowClick]
+  );
 
   // Selection logic
   const selectableVisibleRows = useMemo(() => {
