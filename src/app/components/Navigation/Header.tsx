@@ -44,7 +44,7 @@ const Header = () => {
                 <Chip
                   label="ADMIN"
                   size="small"
-                  color="primary"
+                  color="success"
                   sx={{ fontWeight: 'bold', color: 'white' }}
                 />
                 <Tooltip title="Logout">
@@ -60,13 +60,13 @@ const Header = () => {
             ) : (
               <Button
                 title="Login"
-                color="inherit"
                 onClick={() => navigate('/login')}
                 sx={{
+                  bgcolor: 'success.main',
                   color: 'white',
-                  borderColor: 'white',
+                  fontWeight: 'bold',
                   '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    bgcolor: 'success.dark',
                   },
                 }}
               />
