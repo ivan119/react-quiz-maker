@@ -2,6 +2,8 @@ import {
   createContext,
   useContext,
   useState,
+  useMemo,
+  useCallback,
   type ReactNode,
   type FC,
 } from 'react';
@@ -24,27 +26,29 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return (localStorage.getItem('user_role') as UserRole) || null;
   });
 
-  const login = () => {
+  const login = useCallback(() => {
     const newRole: UserRole = 'admin';
     setRole(newRole);
     localStorage.setItem('user_role', newRole);
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setRole(null);
     localStorage.removeItem('user_role');
-  };
+  }, []);
 
-  const isAdmin = role === 'admin';
-  const isAuthenticated = role !== null;
-
-  return (
-    <AuthContext.Provider
-      value={{ role, login, logout, isAdmin, isAuthenticated }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      role,
+      login,
+      logout,
+      isAdmin: role === 'admin',
+      isAuthenticated: role !== null,
+    }),
+    [role, login, logout]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
