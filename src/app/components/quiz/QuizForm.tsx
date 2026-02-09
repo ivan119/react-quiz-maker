@@ -1,4 +1,4 @@
-import { useState, useMemo, lazy, Suspense } from 'react';
+import { useState, useMemo, useCallback, memo, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -45,33 +45,35 @@ type Props = {
   title?: string;
 };
 
-const AddQuestionButton = ({
-  control,
-  onAdd,
-}: {
-  control: Control<QuizFormValues>;
-  onAdd: () => void;
-}) => {
-  const watchedQuestions = useWatch({
+const AddQuestionButton = memo(
+  ({
     control,
-    name: 'questions',
-  });
+    onAdd,
+  }: {
+    control: Control<QuizFormValues>;
+    onAdd: () => void;
+  }) => {
+    const watchedQuestions = useWatch({
+      control,
+      name: 'questions',
+    });
 
-  const hasIncompleteQuestions = watchedQuestions?.some(
-    (q) => !q?.question?.trim() || !q?.answer?.trim()
-  );
+    const hasIncompleteQuestions = watchedQuestions?.some(
+      (q) => !q?.question?.trim() || !q?.answer?.trim()
+    );
 
-  return (
-    <Button
-      icon={<AddIcon />}
-      variant="contained"
-      size="small"
-      disabled={hasIncompleteQuestions}
-      onClick={onAdd}
-      title="Add Question"
-    />
-  );
-};
+    return (
+      <Button
+        icon={<AddIcon />}
+        variant="contained"
+        size="small"
+        disabled={hasIncompleteQuestions}
+        onClick={onAdd}
+        title="Add Question"
+      />
+    );
+  }
+);
 
 const QuizForm = ({
   defaultValues = { name: '', questions: [] },
@@ -193,7 +195,7 @@ const QuizForm = ({
     [tableRows, remove]
   );
 
-  const handlePushRecycled = () => {
+  const handlePushRecycled = useCallback(() => {
     if (selectedRecycledQuestions.length > 0) {
       const currentQuestions = methods.getValues('questions') || [];
 
@@ -249,15 +251,15 @@ const QuizForm = ({
       setIsRecycleModalOpen(false);
       setSelectedRecycledQuestions([]);
     }
-  };
+  }, [selectedRecycledQuestions, methods, remove, append, showNotification]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     if (onCancel) {
       onCancel();
     } else {
       navigate('/');
     }
-  };
+  }, [onCancel, navigate]);
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto' }}>
