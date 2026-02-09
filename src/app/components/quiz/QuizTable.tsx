@@ -3,10 +3,13 @@ import { Box } from '@mui/material';
 import {
   Delete as DeleteIcon,
   PlayArrow as PlayIcon,
+  ContentCopy as ShareIcon,
 } from '@mui/icons-material';
 import { DataTable, type Column, Button, PreviewText } from '../ui';
 import type { QuizDetail } from '../../../api';
 import { useAuth } from '../../context/AuthContext';
+import { useCallback } from 'react';
+import { useQuizSharing } from '../../hooks/useQuizSharing';
 
 type Props = {
   quizzes: QuizDetail[];
@@ -28,6 +31,14 @@ const QuizTable = ({
   actions,
 }: Props) => {
   const { isAdmin } = useAuth();
+  const { shareQuiz } = useQuizSharing();
+
+  const handleShare = useCallback(
+    (id: string) => {
+      shareQuiz(id);
+    },
+    [shareQuiz]
+  );
 
   const columns: Column<QuizDetail>[] = [
     {
@@ -61,13 +72,22 @@ const QuizTable = ({
             tooltip="Solve Quiz"
           />
           {isAdmin && (
-            <Button
-              isIconButton
-              color="error"
-              onClick={() => onDelete(row)}
-              icon={<DeleteIcon />}
-              tooltip="Delete Quiz"
-            />
+            <>
+              <Button
+                isIconButton
+                color="info"
+                onClick={() => row.id && handleShare(row.id)}
+                icon={<ShareIcon sx={{ fontSize: 20 }} />}
+                tooltip="Share Quiz Link"
+              />
+              <Button
+                isIconButton
+                color="error"
+                onClick={() => onDelete(row)}
+                icon={<DeleteIcon />}
+                tooltip="Delete Quiz"
+              />
+            </>
           )}
         </Box>
       ),
