@@ -178,4 +178,36 @@ export const handlers = [
       { status: 201 }
     );
   }),
+  // POST validate quiz
+  http.post('/quizzes/:id/validate', async ({ params, request }) => {
+    const { id } = params;
+    const body = (await request.json()) as { answers: Record<string, string> };
+    const quizzes = getStoredQuizzes();
+    const quiz = quizzes.find((q) => q.id === id);
+
+    if (!quiz) {
+      return new HttpResponse(null, { status: 404 });
+    }
+
+    const { answers } = body;
+    const results = quiz.questions.map((q) => {
+      const userAnswer = answers[q.id || ''] || '';
+      const isCorrect =
+        userAnswer.trim().toLowerCase() === q.answer.trim().toLowerCase();
+      return {
+        questionId: q.id || '',
+        isCorrect,
+        correctAnswer: q.answer,
+        userAnswer,
+      };
+    });
+
+    const score = results.filter((r) => r.isCorrect).length;
+
+    return HttpResponse.json({
+      score,
+      totalQuestions: quiz.questions.length,
+      results,
+    });
+  }),
 ];

@@ -9,7 +9,10 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import type { QuizDetail } from '../../../shared/types/quiz';
+import type {
+  QuizDetail,
+  QuizValidationResult,
+} from '../../../shared/types/quiz';
 import { Button, PreviewText } from '../ui';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CheckIcon from '@mui/icons-material/Check';
@@ -17,27 +20,17 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 interface QuizCompletedProps {
   quiz: QuizDetail;
-  userAnswers: Record<number, string>;
+  validationResult: QuizValidationResult;
   onRestart: () => void;
   onExit: () => void;
 }
 
 export const QuizCompleted = ({
   quiz,
-  userAnswers,
+  validationResult,
   onRestart,
   onExit,
 }: QuizCompletedProps) => {
-  const calculateScore = () => {
-    return quiz.questions.reduce((acc, q, idx) => {
-      const userAns = userAnswers[idx]?.trim().toLowerCase() || '';
-      const correctAns = q.answer.trim().toLowerCase();
-      return userAns === correctAns ? acc + 1 : acc;
-    }, 0);
-  };
-
-  const score = calculateScore();
-
   return (
     <Box sx={{ maxWidth: 900, mx: 'auto', p: 2, textAlign: 'center', py: 4 }}>
       <CheckCircleOutlineIcon color="success" sx={{ fontSize: 60, mb: 1 }} />
@@ -52,7 +45,7 @@ export const QuizCompleted = ({
       <Box sx={{ mb: 6 }}>
         <PreviewText
           label="Your Score"
-          text={`${score} / ${quiz.questions.length}`}
+          text={`${validationResult.score} / ${validationResult.totalQuestions}`}
           variant="h5"
           sx={{ mb: 3 }}
         />
@@ -69,20 +62,20 @@ export const QuizCompleted = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {quiz.questions.map((q, idx) => {
-                const userAns = userAnswers[idx]?.trim().toLowerCase() || '';
-                const correctAns = q.answer.trim().toLowerCase();
-                const isCorrect = userAns === correctAns;
+              {validationResult.results.map((res, idx) => {
+                const question = quiz.questions.find(
+                  (q) => q.id === res.questionId
+                );
                 return (
                   <TableRow key={idx}>
                     <TableCell>{idx + 1}</TableCell>
-                    <TableCell>{q.question}</TableCell>
+                    <TableCell>{question?.question || 'Unknown'}</TableCell>
                     <TableCell>
-                      {userAnswers[idx] || <em>No answer</em>}
+                      {res.userAnswer || <em>No answer</em>}
                     </TableCell>
-                    <TableCell>{q.answer}</TableCell>
+                    <TableCell>{res.correctAnswer}</TableCell>
                     <TableCell align="center">
-                      {isCorrect ? (
+                      {res.isCorrect ? (
                         <CheckIcon color="success" />
                       ) : (
                         <ErrorOutlineIcon color="error" />

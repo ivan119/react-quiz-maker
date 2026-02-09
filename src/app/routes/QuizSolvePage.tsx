@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
 import { quizService } from '../../api';
-import type { QuizDetail } from '../../api';
+import type { QuizDetail, QuizValidationResult } from '../../api';
 import { Button, PreviewText } from '../components/ui';
 import { QuizCompleted } from '../components/quiz/QuizCompleted';
 import { QuizSolver } from '../components/quiz/QuizSolver';
@@ -17,15 +17,17 @@ const QuizSolvePage = () => {
 
   const [quiz, setQuiz] = useState<QuizDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [validating, setValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAnswerRevealed, setIsAnswerRevealed] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const [validationResult, setValidationResult] =
+    useState<QuizValidationResult | null>(null);
 
   // Guest Solve State
   const [currentAnswer, setCurrentAnswer] = useState('');
-  const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
+  const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
 
   const loadQuiz = useCallback(async () => {
     if (!id) {
@@ -53,28 +55,49 @@ const QuizSolvePage = () => {
     loadQuiz();
   }, [loadQuiz]);
 
-  const handleNext = () => {
+  const handleNext = async (finalAnswers?: Record<string, string>) => {
     if (quiz && currentSlide < quiz.questions.length - 1) {
-      setCurrentSlide((prev) => prev + 1);
+      const nextSlide = currentSlide + 1;
+      const nextQuestionId = quiz.questions[nextSlide].id || '';
+      setCurrentSlide(nextSlide);
       setIsAnswerRevealed(false);
-      setCurrentAnswer(userAnswers[currentSlide + 1] || '');
-    } else if (!isAdmin) {
-      // Only guests go to the "Completed" screen
-      setIsCompleted(true);
+      setCurrentAnswer(
+        finalAnswers?.[nextQuestionId] || userAnswers[nextQuestionId] || ''
+      );
+    } else if (!isAdmin && quiz && id) {
+      // Transition to validation
+      setValidating(true);
+      try {
+        const result = await quizService.validateQuiz(
+          id,
+          finalAnswers || userAnswers
+        );
+        setValidationResult(result);
+      } catch (err) {
+        console.error(err);
+        showNotification('Failed to validate quiz results.', 'error');
+      } finally {
+        setValidating(false);
+      }
     }
   };
 
   const handlePrev = () => {
-    if (currentSlide > 0) {
-      setCurrentSlide((prev) => prev - 1);
+    if (quiz && currentSlide > 0) {
+      const prevSlide = currentSlide - 1;
+      const prevQuestionId = quiz.questions[prevSlide].id || '';
+      setCurrentSlide(prevSlide);
       setIsAnswerRevealed(false);
-      setCurrentAnswer(userAnswers[currentSlide - 1] || '');
+      setCurrentAnswer(userAnswers[prevQuestionId] || '');
     }
   };
 
   const handleSubmitAnswer = () => {
-    setUserAnswers((prev) => ({ ...prev, [currentSlide]: currentAnswer }));
-    handleNext();
+    if (!quiz) return;
+    const qId = quiz.questions[currentSlide].id || '';
+    const newAnswers = { ...userAnswers, [qId]: currentAnswer };
+    setUserAnswers(newAnswers);
+    handleNext(newAnswers);
   };
 
   const handleShare = () => {
@@ -83,14 +106,14 @@ const QuizSolvePage = () => {
   };
 
   const handleRestart = () => {
-    setIsCompleted(false);
+    setValidationResult(null);
     setCurrentSlide(0);
     setUserAnswers({});
     setCurrentAnswer('');
     setIsAnswerRevealed(false);
   };
 
-  if (loading) {
+  if (loading || validating) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
         <CircularProgress />
@@ -111,11 +134,11 @@ const QuizSolvePage = () => {
     );
   }
 
-  if (isCompleted && !isAdmin) {
+  if (validationResult && !isAdmin) {
     return (
       <QuizCompleted
         quiz={quiz}
-        userAnswers={userAnswers}
+        validationResult={validationResult}
         onRestart={handleRestart}
         onExit={() => navigate('/')}
       />

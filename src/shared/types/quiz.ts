@@ -23,3 +23,20 @@ export interface QuestionBankResponse {
   skippedCount: number;
   questions: Question[];
 }
+
+export interface QuizValidationInput {
+  answers: Record<string, string>; // questionId -> answer
+}
+
+export interface QuestionResult {
+  questionId: string;
+  isCorrect: boolean;
+  correctAnswer: string;
+  userAnswer: string;
+}
+
+export interface QuizValidationResult {
+  score: number;
+  totalQuestions: number;
+  results: QuestionResult[];
+}

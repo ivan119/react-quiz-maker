@@ -1,4 +1,9 @@
-import type { Quiz, QuizCreateInput, QuizDetail } from '../shared/types/quiz';
+import type {
+  Quiz,
+  QuizCreateInput,
+  QuizDetail,
+  QuizValidationResult,
+} from '../shared/types/quiz';
 import { request } from './apiClient';
 
 export const quizService = {
@@ -40,5 +45,15 @@ export const quizService = {
         q.id !== excludeId
     );
     return { isTaken };
+  },
+
+  validateQuiz: async (
+    id: string,
+    answers: Record<string, string>
+  ): Promise<QuizValidationResult> => {
+    return request<QuizValidationResult>(`/quizzes/${id}/validate`, {
+      method: 'POST',
+      body: JSON.stringify({ answers }),
+    });
   },
 };
