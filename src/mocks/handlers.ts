@@ -31,13 +31,29 @@ const isQuizNameTaken = (name: string, excludeId?: string): boolean => {
   );
 };
 
+const checkIsAdmin = (request: Request) => {
+  // Just for a demo
+  const auth = request.headers.get('Authorization');
+  return auth === 'Bearer admin';
+};
+
+const sanitizeQuiz = (quiz: Quiz): Quiz => ({
+  ...quiz,
+  questions: quiz.questions.map(({ answer, ...q }) => q as any),
+});
+
+const sanitizeQuestion = ({ answer, ...q }: Question) => q;
+
 export const handlers = [
-  http.get('/quizzes', () => {
-    return HttpResponse.json(getStoredQuizzes());
+  http.get('/quizzes', ({ request }) => {
+    const quizzes = getStoredQuizzes();
+    if (checkIsAdmin(request)) return HttpResponse.json(quizzes);
+
+    return HttpResponse.json(quizzes.map(sanitizeQuiz));
   }),
 
   // GET quiz by id
-  http.get('/quizzes/:id', ({ params }) => {
+  http.get('/quizzes/:id', ({ params, request }) => {
     const { id } = params;
     const quizzes = getStoredQuizzes();
     const quiz = quizzes.find((q) => q.id === id);
@@ -46,7 +62,9 @@ export const handlers = [
       return new HttpResponse(null, { status: 404 });
     }
 
-    return HttpResponse.json(quiz);
+    if (checkIsAdmin(request)) return HttpResponse.json(quiz);
+
+    return HttpResponse.json(sanitizeQuiz(quiz));
   }),
 
   // POST create quiz
@@ -132,8 +150,11 @@ export const handlers = [
   }),
 
   // GET all questions (The Pool) for recycling
-  http.get('/questions', () => {
-    return HttpResponse.json(getStoredQuestions());
+  http.get('/questions', ({ request }) => {
+    const questions = getStoredQuestions();
+    if (checkIsAdmin(request)) return HttpResponse.json(questions);
+
+    return HttpResponse.json(questions.map(sanitizeQuestion));
   }),
 
   // POST create question (API for independent question creation)

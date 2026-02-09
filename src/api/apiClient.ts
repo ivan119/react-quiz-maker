@@ -11,8 +11,10 @@ export async function request<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${BASE_URL}${endpoint}`;
+  const role = localStorage.getItem('user_role');
   const headers = {
     'Content-Type': 'application/json',
+    ...(role ? { Authorization: `Bearer ${role}` } : {}),
     ...options.headers,
   };
 
