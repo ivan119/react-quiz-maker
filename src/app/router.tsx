@@ -15,18 +15,13 @@ export const router = createBrowserRouter([
   {
     element: <MainLayout />,
     children: [
+      { path: '/', element: <QuizListPage /> },
+      { path: '/quiz/:id/solve', element: <QuizSolvePage /> },
       {
         element: <ProtectedRoute />,
         children: [
-          { path: '/', element: <QuizListPage /> },
-          { path: '/quiz/:id/solve', element: <QuizSolvePage /> },
-          {
-            element: <ProtectedRoute adminOnly />,
-            children: [
-              { path: '/quiz/create', element: <QuizCreatePage /> },
-              { path: '/quiz/:id/edit', element: <QuizEditPage /> },
-            ],
-          },
+          { path: '/quiz/create', element: <QuizCreatePage /> },
+          { path: '/quiz/:id/edit', element: <QuizEditPage /> },
         ],
       },
     ],

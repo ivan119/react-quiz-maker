@@ -83,7 +83,14 @@ const QuizTable = ({
         rows={quizzes}
         loading={loading}
         height={600}
-        onRowClick={(row) => isAdmin && row.id && onEdit(row.id)}
+        onRowClick={(row) => {
+          if (!row.id) return;
+          if (isAdmin) {
+            onEdit(row.id);
+          } else {
+            onSolve(row.id);
+          }
+        }}
       />
     </Box>
   );

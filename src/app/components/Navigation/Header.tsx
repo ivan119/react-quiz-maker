@@ -8,12 +8,12 @@ import {
   Tooltip,
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { PreviewText } from '../ui';
+import { PreviewText, Button } from '../ui';
 import { useAuth } from '../../context/AuthContext';
 import LogoutIcon from '@mui/icons-material/Logout';
 
 const Header = () => {
-  const { role, logout } = useAuth();
+  const { logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -39,17 +39,38 @@ const Header = () => {
           />
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Chip
-              label={role?.toUpperCase()}
-              size="small"
-              color={role === 'admin' ? 'primary' : 'success'}
-              sx={{ fontWeight: 'bold', color: 'white' }}
-            />
-            <Tooltip title="Logout">
-              <IconButton color="inherit" onClick={handleLogout} size="small">
-                <LogoutIcon />
-              </IconButton>
-            </Tooltip>
+            {isAuthenticated ? (
+              <>
+                <Chip
+                  label="ADMIN"
+                  size="small"
+                  color="primary"
+                  sx={{ fontWeight: 'bold', color: 'white' }}
+                />
+                <Tooltip title="Logout">
+                  <IconButton
+                    color="inherit"
+                    onClick={handleLogout}
+                    size="small"
+                  >
+                    <LogoutIcon />
+                  </IconButton>
+                </Tooltip>
+              </>
+            ) : (
+              <Button
+                title="Login"
+                color="inherit"
+                onClick={() => navigate('/login')}
+                sx={{
+                  color: 'white',
+                  borderColor: 'white',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
+              />
+            )}
           </Box>
         </Toolbar>
       </Container>

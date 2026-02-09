@@ -6,14 +6,13 @@ import {
   type FC,
 } from 'react';
 
-export type UserRole = 'admin' | 'user' | null;
+export type UserRole = 'admin' | null;
 
 interface AuthContextType {
   role: UserRole;
-  login: (role: UserRole) => void;
+  login: () => void;
   logout: () => void;
   isAdmin: boolean;
-  isUser: boolean;
   isAuthenticated: boolean;
 }
 
@@ -25,13 +24,10 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return (localStorage.getItem('user_role') as UserRole) || null;
   });
 
-  const login = (newRole: UserRole) => {
+  const login = () => {
+    const newRole: UserRole = 'admin';
     setRole(newRole);
-    if (newRole) {
-      localStorage.setItem('user_role', newRole);
-    } else {
-      localStorage.removeItem('user_role');
-    }
+    localStorage.setItem('user_role', newRole);
   };
 
   const logout = () => {
@@ -40,12 +36,11 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   const isAdmin = role === 'admin';
-  const isUser = role === 'user';
   const isAuthenticated = role !== null;
 
   return (
     <AuthContext.Provider
-      value={{ role, login, logout, isAdmin, isUser, isAuthenticated }}
+      value={{ role, login, logout, isAdmin, isAuthenticated }}
     >
       {children}
     </AuthContext.Provider>
