@@ -316,33 +316,34 @@ export const DataTable = <T extends { id?: string | number }>({
         sx={{
           p: 2.5,
           display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
           justifyContent: 'space-between',
-          alignItems: 'center',
+          alignItems: { xs: 'stretch', md: 'center' },
           borderBottom: 1,
           borderColor: 'divider',
           gap: 2,
-          flexWrap: 'wrap',
         }}
       >
-        <Box sx={{ flexShrink: 0 }}>
-          {title && (
-            <PreviewText
-              variant="h5"
-              component="h1"
-              sx={{ fontWeight: 800 }}
-              text={title}
-            />
-          )}
-        </Box>
         <Box
           sx={{
             display: 'flex',
-            gap: 1.5,
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'stretch', sm: 'center' },
+            gap: 2,
             flexGrow: 1,
-            justifyContent: 'flex-end',
-            alignItems: 'center',
           }}
         >
+          {title && (
+            <Box sx={{ flexShrink: 0 }}>
+              <PreviewText
+                variant="h5"
+                component="h1"
+                sx={{ fontWeight: 800 }}
+                text={title}
+              />
+            </Box>
+          )}
+
           {searchable && (
             <TextField
               size="small"
@@ -366,7 +367,17 @@ export const DataTable = <T extends { id?: string | number }>({
               }}
             />
           )}
+        </Box>
 
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 1.5,
+            justifyContent: { xs: 'flex-start', md: 'flex-end' },
+            alignItems: 'center',
+            flexWrap: 'wrap',
+          }}
+        >
           {showSelectionAction && (
             <Button
               variant={isAllVisibleSelected ? 'contained' : 'outlined'}
