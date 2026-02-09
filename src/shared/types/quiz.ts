@@ -10,6 +10,11 @@ export interface Quiz {
   questions: Question[];
 }
 
+export type SanitizedQuestion = Omit<Question, 'answer'>;
+export interface SanitizedQuiz extends Omit<Quiz, 'questions'> {
+  questions: SanitizedQuestion[];
+}
+
 export type QuizDetail = Quiz;
 
 export interface QuizCreateInput {

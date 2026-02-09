@@ -1,5 +1,11 @@
 import { http, HttpResponse } from 'msw';
-import type { Quiz, QuizCreateInput, Question } from '../shared/types/quiz';
+import type {
+  Quiz,
+  QuizCreateInput,
+  Question,
+  SanitizedQuiz,
+  SanitizedQuestion,
+} from '../shared/types/quiz';
 
 const QUIZZES_KEY = 'quizzes';
 const QUESTIONS_KEY = 'questions';
@@ -37,12 +43,12 @@ const checkIsAdmin = (request: Request) => {
   return auth === 'Bearer admin';
 };
 
-const sanitizeQuiz = (quiz: Quiz): Quiz => ({
+const sanitizeQuiz = (quiz: Quiz): SanitizedQuiz => ({
   ...quiz,
-  questions: quiz.questions.map(({ answer, ...q }) => q as any),
+  questions: quiz.questions.map(({ answer, ...q }) => q as SanitizedQuestion),
 });
 
-const sanitizeQuestion = ({ answer, ...q }: Question) => q;
+const sanitizeQuestion = ({ answer, ...q }: Question): SanitizedQuestion => q;
 
 export const handlers = [
   http.get('/quizzes', ({ request }) => {
