@@ -49,6 +49,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         open={open}
         autoHideDuration={4000}
         onClose={hideNotification}
+        sx={{ marginTop: 6 }}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <Alert
