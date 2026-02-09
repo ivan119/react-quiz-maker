@@ -182,7 +182,6 @@ const QuizForm = ({
               onClick={() => remove(index)}
               icon={<DeleteIcon sx={{ fontSize: 20 }} />}
               tooltip="Delete Question"
-              disabled={tableRows.length <= 1}
             />
           </Box>
         ),
