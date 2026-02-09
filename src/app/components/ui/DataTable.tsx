@@ -211,7 +211,7 @@ export const DataTable = <T extends { id?: string | number }>({
         <tbody {...props} ref={ref} />
       )),
     }),
-    [canEdit]
+    [canEdit, getRowSx]
   );
 
   const fixedHeaderContent = () => (
