@@ -1,22 +1,31 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Paper, CircularProgress } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import { quizService } from '../../api';
 import type { QuizDetail } from '../../api';
 import { Button, PreviewText } from '../components/ui';
-import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import { QuizCompleted } from '../components/quiz/QuizCompleted';
+import { QuizSolver } from '../components/quiz/QuizSolver';
+import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
 
 const QuizSolvePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
+  const { showNotification } = useNotification();
+
   const [quiz, setQuiz] = useState<QuizDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [revealedIndexes, setRevealedIndexes] = useState<Set<number>>(
-    new Set()
-  );
+  const [isAnswerRevealed, setIsAnswerRevealed] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+
+  // Guest Solve State
+  const [currentAnswer, setCurrentAnswer] = useState('');
+  const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
 
   const loadQuiz = useCallback(async () => {
     if (!id) {
@@ -25,13 +34,13 @@ const QuizSolvePage = () => {
       return;
     }
     setLoading(true);
-    setError(null);
     try {
       const data = await quizService.getQuizById(id);
-      setQuiz(data ?? null);
-      if (!data) setError('Quiz not found');
-      setRevealedIndexes(new Set());
-      setCurrentSlide(0);
+      if (!data) {
+        setError('Quiz not found');
+      } else {
+        setQuiz(data);
+      }
     } catch (err) {
       console.error(err);
       setError('Failed to load quiz');
@@ -44,216 +53,90 @@ const QuizSolvePage = () => {
     loadQuiz();
   }, [loadQuiz]);
 
-  const totalSlides = quiz?.questions.length ?? 0;
-  const canGoPrev = totalSlides > 0 && currentSlide > 0;
-  const canGoNext = totalSlides > 0 && currentSlide < totalSlides - 1;
-
-  const goPrev = () => {
-    if (canGoPrev) setCurrentSlide((i) => i - 1);
+  const handleNext = () => {
+    if (quiz && currentSlide < quiz.questions.length - 1) {
+      setCurrentSlide((prev) => prev + 1);
+      setIsAnswerRevealed(false);
+      setCurrentAnswer(userAnswers[currentSlide + 1] || '');
+    } else if (!isAdmin) {
+      // Only guests go to the "Completed" screen
+      setIsCompleted(true);
+    }
   };
 
-  const goNext = () => {
-    if (canGoNext) setCurrentSlide((i) => i + 1);
+  const handlePrev = () => {
+    if (currentSlide > 0) {
+      setCurrentSlide((prev) => prev - 1);
+      setIsAnswerRevealed(false);
+      setCurrentAnswer(userAnswers[currentSlide - 1] || '');
+    }
   };
 
-  const toggleAnswer = () => {
-    setRevealedIndexes((prev) => {
-      const next = new Set(prev);
-      if (next.has(currentSlide)) next.delete(currentSlide);
-      else next.add(currentSlide);
-      return next;
-    });
+  const handleSubmitAnswer = () => {
+    setUserAnswers((prev) => ({ ...prev, [currentSlide]: currentAnswer }));
+    handleNext();
   };
 
-  const isRevealed = revealedIndexes.has(currentSlide);
-  const currentQuestion = quiz?.questions[currentSlide];
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    showNotification('Quiz link copied to clipboard!', 'success');
+  };
+
+  const handleRestart = () => {
+    setIsCompleted(false);
+    setCurrentSlide(0);
+    setUserAnswers({});
+    setCurrentAnswer('');
+    setIsAnswerRevealed(false);
+  };
 
   if (loading) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '60vh', // Ensures it shows up in the middle of the page
-          gap: 2,
-        }}
-      >
-        <PreviewText text="Loading quiz…" color="text.secondary" />
-        <CircularProgress color="primary" />
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+        <CircularProgress />
       </Box>
     );
   }
 
   if (error || !quiz) {
     return (
-      <Box sx={{ textAlign: 'center', py: 4 }}>
+      <Box sx={{ textAlign: 'center', py: 8 }}>
         <PreviewText
           text={error || 'Quiz not found'}
           color="error"
-          variant="h6"
-          sx={{ mb: 2 }}
+          variant="h5"
         />
-        <Button
-          variant="outlined"
-          onClick={() => navigate('/')}
-          title="Back to list"
-        />
+        <Button sx={{ mt: 2 }} onClick={() => navigate('/')} title="Go Back" />
       </Box>
     );
   }
 
-  if (quiz.questions.length === 0) {
+  if (isCompleted && !isAdmin) {
     return (
-      <Box sx={{ textAlign: 'center', py: 4 }}>
-        <PreviewText
-          text="This quiz has no questions."
-          color="text.secondary"
-          sx={{ mb: 2 }}
-        />
-        <Button
-          variant="outlined"
-          onClick={() => navigate('/')}
-          title="Back to list"
-        />
-      </Box>
+      <QuizCompleted
+        quiz={quiz}
+        userAnswers={userAnswers}
+        onRestart={handleRestart}
+        onExit={() => navigate('/')}
+      />
     );
   }
 
   return (
-    <Box sx={{ maxWidth: 720, mx: 'auto' }}>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 2,
-        }}
-      >
-        <PreviewText
-          text={quiz.name}
-          variant="h5"
-          sx={{ fontWeight: 'bold' }}
-        />
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={() => navigate('/')}
-          title="Back to quizzes"
-        />
-      </Box>
-
-      <PreviewText
-        text="Admin: run quiz and check correct answers."
-        variant="body2"
-        color="text.secondary"
-        sx={{ mb: 2 }}
-      />
-
-      {/* Progress */}
-      <PreviewText
-        text={`Question ${currentSlide + 1} of ${totalSlides}`}
-        variant="body2"
-        color="text.secondary"
-        sx={{ mb: 1 }}
-      />
-      <Box sx={{ display: 'flex', gap: 0.5, mb: 2, flexWrap: 'wrap' }}>
-        {quiz.questions.map((_, index) => (
-          <Box
-            key={index}
-            onClick={() => setCurrentSlide(index)}
-            sx={{
-              width: 10,
-              height: 10,
-              borderRadius: '50%',
-              bgcolor:
-                index === currentSlide ? 'primary.main' : 'action.selected',
-              cursor: 'pointer',
-              opacity: index === currentSlide ? 1 : 0.6,
-              '&:hover': { opacity: 1 },
-            }}
-            aria-label={`Go to question ${index + 1}`}
-          />
-        ))}
-      </Box>
-
-      {/* Slide content */}
-      <Paper
-        sx={{
-          p: 4,
-          minHeight: 280,
-          borderRadius: 3,
-          border: '1px solid',
-          borderColor: 'divider',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <PreviewText
-          text={currentQuestion?.question ?? ''}
-          variant="h6"
-          sx={{ fontWeight: 600, mb: 2, flex: 1 }}
-        />
-
-        {isRevealed && currentQuestion && (
-          <Box
-            sx={{
-              mb: 2,
-              p: 2,
-              bgcolor: 'success.light',
-              color: 'success.contrastText',
-              borderRadius: 2,
-            }}
-          >
-            <PreviewText
-              label="Correct answer"
-              text={currentQuestion.answer}
-              variant="body1"
-            />
-          </Box>
-        )}
-
-        <Box sx={{ mt: 'auto' }}>
-          <Button
-            variant={isRevealed ? 'outlined' : 'contained'}
-            size="medium"
-            onClick={toggleAnswer}
-            title={isRevealed ? 'Hide answer' : 'Show correct answer'}
-          />
-        </Box>
-      </Paper>
-
-      {/* Slideshow controls */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mt: 3,
-        }}
-      >
-        <Button
-          variant="outlined"
-          onClick={goPrev}
-          disabled={!canGoPrev}
-          icon={<NavigateBeforeIcon />}
-          title="Previous question"
-        />
-        <PreviewText
-          text={`${currentSlide + 1} / ${totalSlides}`}
-          variant="body2"
-          color="text.secondary"
-        />
-        <Button
-          variant="outlined"
-          onClick={goNext}
-          disabled={!canGoNext}
-          icon={<NavigateNextIcon />}
-          title="Next question"
-        />
-      </Box>
-    </Box>
+    <QuizSolver
+      quiz={quiz}
+      currentSlide={currentSlide}
+      isAdmin={isAdmin}
+      isAnswerRevealed={isAnswerRevealed}
+      currentAnswer={currentAnswer}
+      onAnswerChange={setCurrentAnswer}
+      onPrev={handlePrev}
+      onNext={handleNext}
+      onSubmit={handleSubmitAnswer}
+      onShare={handleShare}
+      onToggleReveal={setIsAnswerRevealed}
+      onExit={() => navigate('/')}
+    />
   );
 };
 
