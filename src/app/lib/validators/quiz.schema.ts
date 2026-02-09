@@ -12,8 +12,7 @@ export const quizSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
   questions: z
     .array(questionSchema)
-    .min(2, 'At least 2 questions is required to save quiz')
-    .max(50, 'Quiz can have maximum 50 questions'),
+    .min(1, 'At least 1 question is required to save quiz'),
 });
 
 export type QuizFormValues = z.infer<typeof quizSchema>;
