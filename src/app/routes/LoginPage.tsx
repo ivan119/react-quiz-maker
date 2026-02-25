@@ -39,7 +39,7 @@ const LoginPage: FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#f8fafc',
+        bgcolor: 'background.default',
         padding: 3,
       }}
     >
@@ -76,8 +76,9 @@ const LoginPage: FC = () => {
             alignItems: 'center',
             textAlign: 'center',
             borderRadius: 4,
-            background: 'white',
-            border: '1px solid rgba(0, 0, 0, 0.08)',
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
             transition: 'all 0.3s ease-in-out',
             '&:hover': {
               borderColor: adminRole.color,
