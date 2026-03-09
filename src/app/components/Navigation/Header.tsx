@@ -10,10 +10,14 @@ import {
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { PreviewText, Button } from '../ui';
 import { useAuth } from '../../context/AuthContext';
+import { useThemeContext } from '../../context/ThemeContext';
 import LogoutIcon from '@mui/icons-material/Logout';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
 
 const Header = () => {
   const { logout, isAuthenticated } = useAuth();
+  const { mode, toggleColorMode } = useThemeContext();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -39,6 +43,18 @@ const Header = () => {
           />
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Tooltip
+              title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}
+            >
+              <IconButton
+                color="inherit"
+                onClick={toggleColorMode}
+                size="small"
+              >
+                {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
+              </IconButton>
+            </Tooltip>
+
             {isAuthenticated ? (
               <>
                 <Chip

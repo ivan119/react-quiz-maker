@@ -21,7 +21,7 @@ const LoginPage: FC = () => {
   };
 
   const adminRole = {
-    title: 'REJD',
+    title: 'ADMIN',
     roleLabel: 'ROLE: ADMIN',
     description:
       'Full administrator access. Create, edit, and manage all quizzes and questions.',
@@ -39,14 +39,14 @@ const LoginPage: FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#f8fafc',
+        bgcolor: 'background.default',
         padding: 3,
       }}
     >
       <Container maxWidth="sm">
         <Box sx={{ textAlign: 'center', mb: 6 }}>
           <PreviewText
-            text="REJD QUIZ"
+            text="REACT QUIZ"
             variant="h2"
             sx={{
               fontWeight: 800,
@@ -76,8 +76,9 @@ const LoginPage: FC = () => {
             alignItems: 'center',
             textAlign: 'center',
             borderRadius: 4,
-            background: 'white',
-            border: '1px solid rgba(0, 0, 0, 0.08)',
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
             transition: 'all 0.3s ease-in-out',
             '&:hover': {
               borderColor: adminRole.color,
