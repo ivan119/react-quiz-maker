@@ -21,7 +21,7 @@ const LoginPage: FC = () => {
   };
 
   const adminRole = {
-    title: 'REJD',
+    title: 'ADMIN',
     roleLabel: 'ROLE: ADMIN',
     description:
       'Full administrator access. Create, edit, and manage all quizzes and questions.',
@@ -46,7 +46,7 @@ const LoginPage: FC = () => {
       <Container maxWidth="sm">
         <Box sx={{ textAlign: 'center', mb: 6 }}>
           <PreviewText
-            text="REJD QUIZ"
+            text="REACT QUIZ"
             variant="h2"
             sx={{
               fontWeight: 800,
